@@ -12,7 +12,9 @@ import sast.sastlink.sdk.enums.SastLinkApi;
 import sast.sastlink.sdk.enums.Scope;
 import sast.sastlink.sdk.enums.State;
 import sast.sastlink.sdk.exception.SastLinkException;
+import sast.sastlink.sdk.httpFactory.NoRedirectClientHttpRequestFactory;
 import sast.sastlink.sdk.model.UserInfo;
+import sast.sastlink.sdk.model.UserProfile;
 import sast.sastlink.sdk.model.response.AccessTokenResponse;
 import sast.sastlink.sdk.model.response.CommonResponse;
 import sast.sastlink.sdk.model.response.RefreshResponse;
@@ -32,11 +34,18 @@ import java.util.Optional;
  */
 
 public class RestTemplateSastLinkService extends AbstractSastLinkService {
-    private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate = getDefaultRestTemplate();
     private static final String authorize_response_type = "code";
 
     public static Builder Builder() {
         return new Builder();
+    }
+
+    private static RestTemplate getDefaultRestTemplate() {
+        SimpleClientHttpRequestFactory factory = new NoRedirectClientHttpRequestFactory();
+        factory.setReadTimeout(5000);
+        factory.setConnectTimeout(5000);
+        return new RestTemplate(factory);
     }
 
     @Override
@@ -55,15 +64,18 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 httpHeaders,
                 HttpMethod.POST,
                 SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name));
-        ResponseEntity<AccessTokenResponse> response = restTemplate.exchange(request, AccessTokenResponse.class);
+        ResponseEntity<AccessTokenResponse> response;
+        try {
+            response = restTemplate.exchange(request, AccessTokenResponse.class);
+        } catch (RestClientException e) {
+            throw new SastLinkException(e.getMessage());
+        }
         return response.getBody();
     }
 
 
     @Override
     public String authorize(String token, String code_challenge, String code_challenge_method) throws SastLinkException {
-        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-        multiValueMap.add("token", token);
         URI uri;
         try {
             uri = new URI(SastLinkApi.AUTHORIZE.getHttp(host_name) +
@@ -73,12 +85,19 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                     "&redirect_uri=" + this.redirect_uri +
                     "&response_type=" + authorize_response_type +
                     "&scope=" + Scope.ALL.name +
-                    "&state=" + State.XYZ.name);
+                    "&state=" + State.XYZ.name +
+                    "&part=" + token);
         } catch (URISyntaxException e) {
             throw new SastLinkException(e.getMessage());
         }
-        URI redirect_uri = Optional.ofNullable(restTemplate.postForLocation(uri, multiValueMap))
-                .orElseThrow(() -> new SastLinkException("error  uri,final uri value is null"));
+        HttpHeaders headers = restTemplate.execute(uri, HttpMethod.GET, restTemplate.httpEntityCallback(null), HttpMessage::getHeaders);
+        URI redirect_uri;
+        try {
+            redirect_uri = Optional.ofNullable(headers == null ? null : headers.getLocation())
+                    .orElseThrow(() -> new SastLinkException("error uri, final uri value is null"));
+        } catch (Exception e) {
+            throw new SastLinkException(e.getMessage());
+        }
         String queryString = redirect_uri.getQuery();
         return queryString.substring(queryString.indexOf("code=") + 5, queryString.indexOf("&state="));
     }
@@ -95,7 +114,12 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 httpHeaders,
                 HttpMethod.POST,
                 SastLinkApi.REFRESH.getHttpURI(host_name));
-        ResponseEntity<RefreshResponse> response = restTemplate.exchange(request, RefreshResponse.class);
+        ResponseEntity<RefreshResponse> response;
+        try {
+            response = restTemplate.exchange(request, RefreshResponse.class);
+        } catch (RestClientException e) {
+            throw new SastLinkException(e.getMessage());
+        }
         return response.getBody();
     }
 
@@ -114,13 +138,31 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             throw new SastLinkException(e.getMessage());
         }
         Map<String, String> resultMap = Optional.ofNullable(response.getBody())
-                .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken,return value is null."))
+                .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."))
                 .getData();
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(resultMap.get("user_id"));
         userInfo.setWechatId(resultMap.get("wechat_id"));
         userInfo.setEmail(resultMap.get("email"));
         return userInfo;
+    }
+
+    @Override
+    public UserProfile uerProfile(String accessToken) throws SastLinkException {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("TOKEN", accessToken);
+        RequestEntity<?> request = new RequestEntity<>(
+                httpHeaders,
+                HttpMethod.GET,
+                SastLinkApi.GET_PROFILE.getHttpURI(host_name));
+        ResponseEntity<UserProfile> response;
+        try {
+            response = restTemplate.exchange(request, UserProfile.class);
+        } catch (RestClientException e) {
+            throw new SastLinkException(e.getMessage());
+        }
+        return Optional.ofNullable(response.getBody())
+                .orElseThrow(() -> new SastLinkException("Error get userProfile by accessToken, return value is null."));
     }
 
     @Override
@@ -253,27 +295,11 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         };
     }
 
-
-    private static RestTemplate getDefaultRestTemplate() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setReadTimeout(5000);
-        factory.setConnectTimeout(5000);
-        return new RestTemplate(factory);
-    }
-
     private RestTemplateSastLinkService(Builder builder) {
         super(builder);
-        restTemplate = builder.restTemplate;
     }
 
     public static class Builder extends AbstractSastLinkService.Builder<Builder> {
-        private RestTemplate restTemplate;
-
-        public Builder setRestTemplate(RestTemplate restTemplate) {
-            this.restTemplate = restTemplate;
-            return this;
-        }
-
         @Override
         protected Builder self() {
             return this;
@@ -289,9 +315,6 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             }
             if (this.code_verifier.isEmpty()) {
                 throw new SastLinkException("code_verifier is needed in building a sastLinkService");
-            }
-            if (restTemplate == null) {
-                this.setRestTemplate(RestTemplateSastLinkService.getDefaultRestTemplate());
             }
             return new RestTemplateSastLinkService(this);
         }

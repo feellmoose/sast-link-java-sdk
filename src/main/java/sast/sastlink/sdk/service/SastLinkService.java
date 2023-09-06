@@ -2,6 +2,7 @@ package sast.sastlink.sdk.service;
 
 import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.model.UserInfo;
+import sast.sastlink.sdk.model.UserProfile;
 import sast.sastlink.sdk.model.response.AccessTokenResponse;
 import sast.sastlink.sdk.model.response.RefreshResponse;
 
@@ -16,6 +17,9 @@ public interface SastLinkService {
 
     /* 使用accessToken获取用户信息 */
     UserInfo userInfo(String accessToken) throws SastLinkException;
+
+    /* 使用Token获取profile */
+    UserProfile uerProfile(String accessToken) throws SastLinkException;
 
     /* 验证账号登录有效性并登录 */
     String login(String email, String password) throws SastLinkException;
