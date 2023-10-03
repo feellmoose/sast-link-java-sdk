@@ -13,43 +13,48 @@ public class UserProfile {
     private String nickname;
     private String avatar;
     @JsonAlias("dep")
-    private String department;
+    private String dep;
     @JsonAlias("org")
     private Integer organization;
     private String email;
     @JsonAlias("bio")
     private String biography;
     private List<String> link;
-    private String badge;
+    private Badge badge;
     private List<String> hide;
+    @JsonAlias("carrerRecord")
+    private List<CareerRecord> careerRecord;
 
     public UserProfile() {
     }
 
-    public UserProfile(String nickname, String avatar, String department, Integer organization, String email, String biography, List<String> link, String badge, List<String> hide) {
+    public UserProfile(String nickname, String avatar, String dep, Integer organization, String email, String biography, List<String> link, Badge badge, List<String> hide, List<CareerRecord> careerRecord) {
         this.nickname = nickname;
         this.avatar = avatar;
-        this.department = department;
+        this.dep = dep;
         this.organization = organization;
         this.email = email;
         this.biography = biography;
         this.link = link;
         this.badge = badge;
         this.hide = hide;
+        this.careerRecord = careerRecord;
     }
+
 
     @Override
     public String toString() {
         return "UserProfile{" +
                 "nickname='" + nickname + '\'' +
                 ", avatar='" + avatar + '\'' +
-                ", department='" + department + '\'' +
-                ", organization='" + organization + '\'' +
+                ", dep='" + dep + '\'' +
+                ", organization=" + organization +
                 ", email='" + email + '\'' +
                 ", biography='" + biography + '\'' +
                 ", link=" + link +
-                ", badge='" + badge + '\'' +
+                ", badge=" + badge +
                 ", hide=" + hide +
+                ", careerRecord=" + careerRecord +
                 '}';
     }
 
@@ -69,12 +74,12 @@ public class UserProfile {
         this.avatar = avatar;
     }
 
-    public String getDepartment() {
-        return department;
+    public String getDep() {
+        return dep;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setDep(String dep) {
+        this.dep = dep;
     }
 
     public Integer getOrganization() {
@@ -109,11 +114,11 @@ public class UserProfile {
         this.link = link;
     }
 
-    public String getBadge() {
+    public Badge getBadge() {
         return badge;
     }
 
-    public void setBadge(String badge) {
+    public void setBadge(Badge badge) {
         this.badge = badge;
     }
 
@@ -123,5 +128,13 @@ public class UserProfile {
 
     public void setHide(List<String> hide) {
         this.hide = hide;
+    }
+
+    public List<CareerRecord> getCareerRecord() {
+        return careerRecord;
+    }
+
+    public void setCareerRecord(List<CareerRecord> careerRecord) {
+        this.careerRecord = careerRecord;
     }
 }

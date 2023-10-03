@@ -141,8 +141,8 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."))
                 .getData();
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(resultMap.get("user_id"));
-        userInfo.setWechatId(resultMap.get("wechat_id"));
+        userInfo.setUserId(resultMap.get("userId"));
+        userInfo.setWechatId(resultMap.get("wechatId"));
         userInfo.setEmail(resultMap.get("email"));
         return userInfo;
     }
