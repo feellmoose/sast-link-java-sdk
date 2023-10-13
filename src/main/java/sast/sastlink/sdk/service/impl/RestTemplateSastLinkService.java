@@ -14,7 +14,6 @@ import sast.sastlink.sdk.enums.State;
 import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.httpFactory.NoRedirectClientHttpRequestFactory;
 import sast.sastlink.sdk.model.UserInfo;
-import sast.sastlink.sdk.model.UserProfile;
 import sast.sastlink.sdk.model.response.AccessTokenResponse;
 import sast.sastlink.sdk.model.response.CommonResponse;
 import sast.sastlink.sdk.model.response.RefreshResponse;
@@ -99,6 +98,9 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             throw new SastLinkException(e.getMessage());
         }
         String queryString = redirect_uri.getQuery();
+        if(queryString.contains("error")){
+            throw new SastLinkException("sast-link error: " + queryString);
+        }
         return queryString.substring(queryString.indexOf("code=") + 5, queryString.indexOf("&state="));
     }
 
@@ -140,30 +142,21 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         Map<String, String> resultMap = Optional.ofNullable(response.getBody())
                 .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."))
                 .getData();
-        UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(resultMap.get("userId"));
-        userInfo.setWechatId(resultMap.get("wechatId"));
-        userInfo.setEmail(resultMap.get("email"));
-        return userInfo;
+        return new UserInfo()
+                .setUserId(resultMap.get("userId"))
+                .setLink(resultMap.get("link"))
+                .setAvatar(resultMap.get("avatar"))
+                .setBio(resultMap.get("bio"))
+                .setDep(resultMap.get("dep"))
+                .setBadge(resultMap.get("badge"))
+                .setEmail(resultMap.get("email"))
+                .setHide(resultMap.get("hide"))
+                .setNickname(resultMap.get("nickname"))
+                .setOrg(resultMap.get("org"))
+                .setWechatId(resultMap.get("wechatId"));
     }
 
-    @Override
-    public UserProfile uerProfile(String accessToken) throws SastLinkException {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("TOKEN", accessToken);
-        RequestEntity<?> request = new RequestEntity<>(
-                httpHeaders,
-                HttpMethod.GET,
-                SastLinkApi.GET_PROFILE.getHttpURI(host_name));
-        ResponseEntity<UserProfile> response;
-        try {
-            response = restTemplate.exchange(request, UserProfile.class);
-        } catch (RestClientException e) {
-            throw new SastLinkException(e.getMessage());
-        }
-        return Optional.ofNullable(response.getBody())
-                .orElseThrow(() -> new SastLinkException("Error get userProfile by accessToken, return value is null."));
-    }
+
 
     @Override
     public String login(String email, String password) throws SastLinkException {
@@ -185,72 +178,8 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         }
         CommonResponse commonResponse = Optional.ofNullable(responseEntity.getBody())
                 .orElseThrow(() -> new SastLinkException("error, login response is null."));
-        return Optional.ofNullable(commonResponse.getData().get("token"))
-                .orElseThrow(() -> new SastLinkException("error, no token in response.\nerror response value: " + commonResponse));
-    }
-
-    @Override
-    public String sendCaptcha(String email) throws SastLinkException {
-        String registerTicket = verifyAccount(email, "0");
-        /* 发送邮箱验证码 */
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("REGISTER-TICKET", registerTicket);
-        RequestEntity<?> request = new RequestEntity<>(
-                httpHeaders,
-                HttpMethod.GET,
-                SastLinkApi.SEND_EMAIL.getHttpURI(host_name));
-        ResponseEntity<CommonResponse> responseEntity;
-        try {
-            responseEntity = restTemplate.exchange(request, CommonResponse.class);
-        } catch (RestClientException e) {
-            throw new SastLinkException(e.getMessage());
-        }
-        Optional.ofNullable(responseEntity.getBody())
-                .orElseThrow(() -> new SastLinkException("error, send captcha response is null."));
-        return registerTicket;
-    }
-
-    @Override
-    public boolean checkCaptchaAndRegister(String captcha, String registerTicket, String password) throws SastLinkException {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        httpHeaders.add("REGISTER-TICKET", registerTicket);
-        /* 验证邮箱验证码 */
-        MultiValueMap<String, String> checkCaptchaMultiValueMap = new LinkedMultiValueMap<>();
-        checkCaptchaMultiValueMap.add("captcha", captcha);
-        RequestEntity<MultiValueMap<String, String>> checkCaptchaRequest = new RequestEntity<>(
-                checkCaptchaMultiValueMap,
-                httpHeaders,
-                HttpMethod.POST,
-                SastLinkApi.VERIFY_CAPTCHA.getHttpURI(host_name));
-        ResponseEntity<CommonResponse> checkCaptchaResponseEntity;
-        try {
-            checkCaptchaResponseEntity = restTemplate.exchange(checkCaptchaRequest, CommonResponse.class);
-        } catch (RestClientException e) {
-            throw new SastLinkException(e.getMessage());
-        }
-        CommonResponse response = Optional.ofNullable(checkCaptchaResponseEntity.getBody())
-                .orElseThrow(() -> new SastLinkException("error, check captcha response is null."));
-        if (!response.getSuccess()) {
-            throw new SastLinkException("check captcha error.");
-        }
-        /* 正式注册 */
-        MultiValueMap<String, String> registerMultiValueMap = new LinkedMultiValueMap<>();
-        registerMultiValueMap.add("password", password);
-        RequestEntity<MultiValueMap<String, String>> registerRequest = new RequestEntity<>(
-                registerMultiValueMap,
-                httpHeaders,
-                HttpMethod.POST,
-                SastLinkApi.REGISTER.getHttpURI(host_name));
-        ResponseEntity<CommonResponse> registerResponseEntity;
-        try {
-            registerResponseEntity = restTemplate.exchange(registerRequest, CommonResponse.class);
-        } catch (RestClientException e) {
-            throw new SastLinkException(e.getMessage());
-        }
-        CommonResponse commonResponse = Optional.ofNullable(registerResponseEntity.getBody())
-                .orElseThrow(() -> new SastLinkException("error, register response is null."));
-        return commonResponse.getSuccess();
+        return Optional.ofNullable(commonResponse.getData().get("loginToken"))
+                .orElseThrow(() -> new SastLinkException("error, no loginToken in response.\nerror response value: " + commonResponse));
     }
 
     @Override
@@ -287,9 +216,9 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             throw new SastLinkException("error response value: " + commonResponse);
         }
         return switch (flag) {
-            case "0" -> Optional.ofNullable(commonResponse.getData().get("register_ticket"))
+            case "0" -> Optional.ofNullable(commonResponse.getData().get("registerTicket"))
                     .orElseThrow(() -> new SastLinkException("error, no register ticket in response.\nerror response value: " + commonResponse));
-            case "1" -> Optional.ofNullable(commonResponse.getData().get("login_ticket"))
+            case "1" -> Optional.ofNullable(commonResponse.getData().get("loginTicket"))
                     .orElseThrow(() -> new SastLinkException("error, no register ticket in response.\nerror response value: " + commonResponse));
             default -> throw new SastLinkException("invalid flag value.");
         };

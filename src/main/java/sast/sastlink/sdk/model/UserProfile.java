@@ -1,6 +1,7 @@
 package sast.sastlink.sdk.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import sast.sastlink.sdk.enums.Organization;
 
 import java.util.List;
 
@@ -12,33 +13,43 @@ import java.util.List;
 public class UserProfile {
     private String nickname;
     private String avatar;
-    @JsonAlias("dep")
     private String dep;
-    @JsonAlias("org")
-    private Integer organization;
+    private Organization organization;
     private String email;
-    @JsonAlias("bio")
     private String biography;
     private List<String> link;
     private Badge badge;
     private List<String> hide;
-    @JsonAlias("carrerRecord")
     private List<CareerRecord> careerRecord;
 
-    public UserProfile() {
+    public UserProfile(UserInfo userInfo) {
+        this.nickname = userInfo.getNickname();
+        this.avatar = userInfo.getAvatar();
+        this.dep = userInfo.getDep();
+        this.organization = Organization.valueOf(userInfo.getOrg());
+        this.email = userInfo.getEmail();
+        this.biography = userInfo.getBio();
+        this.link = getLinkFromJson(userInfo.getLink());
+        this.badge = getBadgeFromJson(userInfo.getBadge());
+        this.hide = getHideFromJson(userInfo.getHide());
+        this.careerRecord = getCareerRecordFromJson(null);
+    }
+    private List<String> getLinkFromJson(String linkJson){
+        //todo
+        return null;
+    }
+    private Badge getBadgeFromJson(String badgeJson){
+        //todo
+        return null;
     }
 
-    public UserProfile(String nickname, String avatar, String dep, Integer organization, String email, String biography, List<String> link, Badge badge, List<String> hide, List<CareerRecord> careerRecord) {
-        this.nickname = nickname;
-        this.avatar = avatar;
-        this.dep = dep;
-        this.organization = organization;
-        this.email = email;
-        this.biography = biography;
-        this.link = link;
-        this.badge = badge;
-        this.hide = hide;
-        this.careerRecord = careerRecord;
+    List<String> getHideFromJson(String hideJson){
+        //todo
+        return null;
+    }
+
+    List<CareerRecord> getCareerRecordFromJson(String careerRecord){
+        return null;
     }
 
 
@@ -62,79 +73,39 @@ public class UserProfile {
         return nickname;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
     public String getAvatar() {
         return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
     }
 
     public String getDep() {
         return dep;
     }
 
-    public void setDep(String dep) {
-        this.dep = dep;
-    }
-
-    public Integer getOrganization() {
+    public Organization getOrganization() {
         return organization;
-    }
-
-    public void setOrganization(Integer organization) {
-        this.organization = organization;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getBiography() {
         return biography;
-    }
-
-    public void setBiography(String biography) {
-        this.biography = biography;
     }
 
     public List<String> getLink() {
         return link;
     }
 
-    public void setLink(List<String> link) {
-        this.link = link;
-    }
-
     public Badge getBadge() {
         return badge;
-    }
-
-    public void setBadge(Badge badge) {
-        this.badge = badge;
     }
 
     public List<String> getHide() {
         return hide;
     }
 
-    public void setHide(List<String> hide) {
-        this.hide = hide;
-    }
-
     public List<CareerRecord> getCareerRecord() {
         return careerRecord;
-    }
-
-    public void setCareerRecord(List<CareerRecord> careerRecord) {
-        this.careerRecord = careerRecord;
     }
 }

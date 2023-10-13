@@ -19,7 +19,7 @@ public enum Organization {
 
     ONE_CHIP(11,Department.ELECTRONIC,"单片机与控制算法方向"),
     ANALOG_ELECTRONICS(12,Department.ELECTRONIC,"模拟电子与信号方向"),
-    IMAGE_PROCESSING(13,Department.ELECTRONIC,"图片处理与嵌入式方向"),
+    IMAGE_PROCESSING(13,Department.ELECTRONIC,"图片处理与嵌入式方向人工智能 "),
     EDA(14,Department.ELECTRONIC,"EDA方向"),
     FPGA(15,Department.ELECTRONIC,"数字电路与FPGA方向"),
 
