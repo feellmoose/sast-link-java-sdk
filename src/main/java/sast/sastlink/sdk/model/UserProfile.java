@@ -1,7 +1,11 @@
 package sast.sastlink.sdk.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import sast.sastlink.sdk.enums.Organization;
+import sast.sastlink.sdk.exception.SastLinkException;
 
 import java.util.List;
 
@@ -26,7 +30,7 @@ public class UserProfile {
         this.nickname = userInfo.getNickname();
         this.avatar = userInfo.getAvatar();
         this.dep = userInfo.getDep();
-        this.organization = Organization.valueOf(userInfo.getOrg());
+        this.organization = getOrg(userInfo.getOrg());
         this.email = userInfo.getEmail();
         this.biography = userInfo.getBio();
         this.link = getLinkFromJson(userInfo.getLink());
@@ -34,21 +38,31 @@ public class UserProfile {
         this.hide = getHideFromJson(userInfo.getHide());
         this.careerRecord = getCareerRecordFromJson(null);
     }
+    private Organization getOrg(String org){
+        if(org == null||org.isEmpty()){
+            return null;
+        }
+        return Organization.valueOf(org);
+    }
     private List<String> getLinkFromJson(String linkJson){
-        //todo
-        return null;
+        if(linkJson == null||linkJson.isEmpty()){
+            return null;
+        }
+        try {
+            return new ObjectMapper().readValue(linkJson,List.class);
+        } catch (JsonProcessingException e) {
+            throw new SastLinkException(e.getMessage());
+        }
     }
     private Badge getBadgeFromJson(String badgeJson){
-        //todo
         return null;
     }
 
-    List<String> getHideFromJson(String hideJson){
-        //todo
+    private List<String> getHideFromJson(String hideJson){
         return null;
     }
 
-    List<CareerRecord> getCareerRecordFromJson(String careerRecord){
+    private List<CareerRecord> getCareerRecordFromJson(String careerRecord){
         return null;
     }
 
