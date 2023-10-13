@@ -152,8 +152,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 .setEmail(resultMap.get("email"))
                 .setHide(resultMap.get("hide"))
                 .setNickname(resultMap.get("nickname"))
-                .setOrg(resultMap.get("org"))
-                .setWechatId(resultMap.get("wechatId"));
+                .setOrg(resultMap.get("org"));
     }
 
 

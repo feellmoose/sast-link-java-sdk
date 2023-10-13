@@ -7,7 +7,6 @@ package sast.sastlink.sdk.model;
  */
 public class UserInfo {
     private String userId;
-    private String wechatId;
     private String email;
     private String avatar;
     private String badge;
@@ -22,7 +21,6 @@ public class UserInfo {
     public String toString() {
         return "UserInfo{" +
                 "userId='" + userId + '\'' +
-                ", wechatId='" + wechatId + '\'' +
                 ", email='" + email + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", badge='" + badge + '\'' +
@@ -41,15 +39,6 @@ public class UserInfo {
 
     public UserInfo setUserId(String userId) {
         this.userId = userId;
-        return this;
-    }
-
-    public String getWechatId() {
-        return wechatId;
-    }
-
-    public UserInfo setWechatId(String wechatId) {
-        this.wechatId = wechatId;
         return this;
     }
 
@@ -137,9 +126,8 @@ public class UserInfo {
     public UserInfo() {
     }
 
-    public UserInfo(String userId, String wechatId, String email, String avatar, String badge, String bio, String dep, String hide, String link, String nickname, String org) {
+    public UserInfo(String userId, String email, String avatar, String badge, String bio, String dep, String hide, String link, String nickname, String org) {
         this.userId = userId;
-        this.wechatId = wechatId;
         this.email = email;
         this.avatar = avatar;
         this.badge = badge;
