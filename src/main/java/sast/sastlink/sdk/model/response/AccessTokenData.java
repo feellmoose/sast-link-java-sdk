@@ -7,7 +7,7 @@ package sast.sastlink.sdk.model.response;
  */
 public class AccessTokenData {
     private String access_token;
-    private long expires_in;
+    private Integer expires_in;
     private String refresh_token;
     private String scope;
     private String token_type;
@@ -15,7 +15,7 @@ public class AccessTokenData {
     public AccessTokenData() {
     }
 
-    public AccessTokenData(String access_token, long expires_in, String refresh_token, String scope, String token_type) {
+    public AccessTokenData(String access_token, Integer expires_in, String refresh_token, String scope, String token_type) {
         this.access_token = access_token;
         this.expires_in = expires_in;
         this.refresh_token = refresh_token;
@@ -33,11 +33,11 @@ public class AccessTokenData {
         this.access_token = access_token;
     }
 
-    public long getExpires_in() {
+    public Integer getExpires_in() {
         return expires_in;
     }
 
-    public void setExpires_in(long expires_in) {
+    public void setExpires_in(Integer expires_in) {
         this.expires_in = expires_in;
     }
 

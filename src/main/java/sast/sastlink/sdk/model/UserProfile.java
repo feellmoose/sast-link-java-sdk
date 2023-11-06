@@ -33,7 +33,7 @@ public class UserProfile {
         this.organization = getOrg(userInfo.getOrg());
         this.email = userInfo.getEmail();
         this.biography = userInfo.getBio();
-        this.link = getLinkFromJson(userInfo.getLink());
+        this.link = userInfo.getLink();
         this.badge = getBadgeFromJson(userInfo.getBadge());
         this.hide = getHideFromJson(userInfo.getHide());
         this.careerRecord = getCareerRecordFromJson(null);
@@ -43,16 +43,6 @@ public class UserProfile {
             return null;
         }
         return Organization.valueOf(org);
-    }
-    private List<String> getLinkFromJson(String linkJson){
-        if(linkJson == null||linkJson.isEmpty()){
-            return null;
-        }
-        try {
-            return new ObjectMapper().readValue(linkJson,List.class);
-        } catch (JsonProcessingException e) {
-            throw new SastLinkException(e.getMessage());
-        }
     }
     private Badge getBadgeFromJson(String badgeJson){
         return null;

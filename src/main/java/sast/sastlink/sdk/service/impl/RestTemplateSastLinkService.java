@@ -22,10 +22,7 @@ import sast.sastlink.sdk.service.SastLinkService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -76,12 +73,12 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         if(!commonResponse.getSuccess()){
             throw new SastLinkException("Error get userInfo: "+commonResponse);
         }
-        Map<String, String> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
-        return new AccessTokenData(resultMap.get("access_token"),
-                Long.parseLong(resultMap.get("expires_in")),
-                resultMap.get("refresh_token"),
-                resultMap.get("scope"),
-                resultMap.get("token_type"));
+        Map<String, Object> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
+        return new AccessTokenData((String) resultMap.get("access_token"),
+                (Integer) resultMap.get("expires_in"),
+                (String) resultMap.get("refresh_token"),
+                (String) resultMap.get("scope"),
+                (String) resultMap.get("token_type"));
     }
 
 
@@ -156,18 +153,19 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         if(!commonResponse.getSuccess()){
             throw new SastLinkException("Error get userInfo: "+commonResponse);
         }
-        Map<String, String> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
+        Map<String, Object> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
         return new UserInfo()
-                .setUserId(resultMap.get("userId"))
-                .setLink(resultMap.get("link"))
-                .setAvatar(resultMap.get("avatar"))
-                .setBio(resultMap.get("bio"))
-                .setDep(resultMap.get("dep"))
-                .setBadge(resultMap.get("badge"))
-                .setEmail(resultMap.get("email"))
-                .setHide(resultMap.get("hide"))
-                .setNickname(resultMap.get("nickname"))
-                .setOrg(resultMap.get("org"));
+                .setHide((String) resultMap.get("hide"))
+                .setUserId((String) resultMap.get("userId"))
+                .setLink((List<String>) resultMap.get("link"))
+                .setAvatar((String) resultMap.get("avatar"))
+                .setBio((String) resultMap.get("bio"))
+                .setDep((String) resultMap.get("dep"))
+                .setBadge((String) resultMap.get("badge"))
+                .setEmail((String) resultMap.get("email"))
+                .setHide((String) resultMap.get("hide"))
+                .setNickname((String) resultMap.get("nickname"))
+                .setOrg((String) resultMap.get("org"));
     }
 
 
@@ -192,7 +190,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         }
         CommonResponse commonResponse = Optional.ofNullable(responseEntity.getBody())
                 .orElseThrow(() -> new SastLinkException("error, login response is null."));
-        return Optional.ofNullable(commonResponse.getData().get("loginToken"))
+        return Optional.ofNullable((String) commonResponse.getData().get("loginToken"))
                 .orElseThrow(() -> new SastLinkException("error, no loginToken in response.\nerror response value: " + commonResponse));
     }
 
@@ -230,9 +228,9 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             throw new SastLinkException("error response value: " + commonResponse);
         }
         return switch (flag) {
-            case "0" -> Optional.ofNullable(commonResponse.getData().get("registerTicket"))
+            case "0" -> Optional.ofNullable((String) commonResponse.getData().get("registerTicket"))
                     .orElseThrow(() -> new SastLinkException("error, no register ticket in response.\nerror response value: " + commonResponse));
-            case "1" -> Optional.ofNullable(commonResponse.getData().get("loginTicket"))
+            case "1" -> Optional.ofNullable((String) commonResponse.getData().get("loginTicket"))
                     .orElseThrow(() -> new SastLinkException("error, no register ticket in response.\nerror response value: " + commonResponse));
             default -> throw new SastLinkException("invalid flag value.");
         };

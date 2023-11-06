@@ -1,5 +1,7 @@
 package sast.sastlink.sdk.model;
 
+import java.util.List;
+
 /**
  * @projectName: sast-link-SDK
  * @author: feelMoose
@@ -13,7 +15,7 @@ public class UserInfo {
     private String bio;
     private String dep;
     private String hide;
-    private String link;
+    private List<String> link;
     private String nickname;
     private String org;
 
@@ -69,6 +71,15 @@ public class UserInfo {
         return this;
     }
 
+    public List<String> getLink() {
+        return link;
+    }
+
+    public UserInfo setLink(List<String> link) {
+        this.link = link;
+        return this;
+    }
+
     public String getBio() {
         return bio;
     }
@@ -96,14 +107,7 @@ public class UserInfo {
         return this;
     }
 
-    public String getLink() {
-        return link;
-    }
 
-    public UserInfo setLink(String link) {
-        this.link = link;
-        return this;
-    }
 
     public String getNickname() {
         return nickname;
@@ -126,7 +130,7 @@ public class UserInfo {
     public UserInfo() {
     }
 
-    public UserInfo(String userId, String email, String avatar, String badge, String bio, String dep, String hide, String link, String nickname, String org) {
+    public UserInfo(String userId, String email, String avatar, String badge, String bio, String dep, String hide, List<String> link, String nickname, String org) {
         this.userId = userId;
         this.email = email;
         this.avatar = avatar;

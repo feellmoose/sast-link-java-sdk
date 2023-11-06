@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class CommonResponse {
     @JsonAlias("Data")
-    private Map<String, String> data;
+    private Map<String, Object> data;
     @JsonAlias("ErrCode")
     private Integer errCode;
     @JsonAlias("ErrMsg")
@@ -22,7 +22,7 @@ public class CommonResponse {
     public CommonResponse() {
     }
 
-    public CommonResponse(Map<String, String> data, Integer errCode, String errMsg, boolean success) {
+    public CommonResponse(Map<String, Object> data, Integer errCode, String errMsg, boolean success) {
         this.data = data;
         this.errCode = errCode;
         this.errMsg = errMsg;
@@ -31,11 +31,11 @@ public class CommonResponse {
 
     /* Getter and Setter */
 
-    public Map<String, String> getData() {
+    public Map<String, Object> getData() {
         return data;
     }
 
-    public void setData(Map<String, String> data) {
+    public void setData(Map<String, Object> data) {
         this.data = data;
     }
 
