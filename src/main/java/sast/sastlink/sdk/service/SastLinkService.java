@@ -2,11 +2,11 @@ package sast.sastlink.sdk.service;
 
 import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.model.UserInfo;
-import sast.sastlink.sdk.model.response.AccessTokenResponse;
+import sast.sastlink.sdk.model.response.AccessTokenData;
 import sast.sastlink.sdk.model.response.RefreshResponse;
 
 public interface SastLinkService {
-    AccessTokenResponse accessToken(String code) throws SastLinkException;
+    AccessTokenData accessToken(String code) throws SastLinkException;
 
     /* 获取授权code */
     String authorize(String token, String code_challenge, String code_challenge_method) throws SastLinkException;

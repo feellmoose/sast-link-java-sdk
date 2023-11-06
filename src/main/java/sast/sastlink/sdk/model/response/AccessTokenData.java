@@ -5,17 +5,17 @@ package sast.sastlink.sdk.model.response;
  * @author: feelMoose
  * @date: 2023/8/19 21:23
  */
-public class AccessTokenResponse {
+public class AccessTokenData {
     private String access_token;
     private long expires_in;
     private String refresh_token;
     private String scope;
     private String token_type;
 
-    public AccessTokenResponse() {
+    public AccessTokenData() {
     }
 
-    public AccessTokenResponse(String access_token, long expires_in, String refresh_token, String scope, String token_type) {
+    public AccessTokenData(String access_token, long expires_in, String refresh_token, String scope, String token_type) {
         this.access_token = access_token;
         this.expires_in = expires_in;
         this.refresh_token = refresh_token;
@@ -67,7 +67,7 @@ public class AccessTokenResponse {
 
     @Override
     public String toString() {
-        return "AccessTokenResponse{" +
+        return "AccessTokenData{" +
                 "access_token='" + access_token + '\'' +
                 ", expires_in=" + expires_in +
                 ", refresh_token='" + refresh_token + '\'' +

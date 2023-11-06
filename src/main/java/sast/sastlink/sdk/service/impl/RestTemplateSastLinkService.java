@@ -1,6 +1,7 @@
 package sast.sastlink.sdk.service.impl;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,13 +15,14 @@ import sast.sastlink.sdk.enums.State;
 import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.httpFactory.NoRedirectClientHttpRequestFactory;
 import sast.sastlink.sdk.model.UserInfo;
-import sast.sastlink.sdk.model.response.AccessTokenResponse;
+import sast.sastlink.sdk.model.response.AccessTokenData;
 import sast.sastlink.sdk.model.response.CommonResponse;
 import sast.sastlink.sdk.model.response.RefreshResponse;
 import sast.sastlink.sdk.service.SastLinkService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +50,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
     }
 
     @Override
-    public AccessTokenResponse accessToken(String code) throws SastLinkException {
+    public AccessTokenData accessToken(String code) throws SastLinkException {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
@@ -63,13 +65,23 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 httpHeaders,
                 HttpMethod.POST,
                 SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name));
-        ResponseEntity<AccessTokenResponse> response;
+        ResponseEntity<CommonResponse> response;
         try {
-            response = restTemplate.exchange(request, AccessTokenResponse.class);
+            response = restTemplate.exchange(request, CommonResponse.class);
         } catch (RestClientException e) {
             throw new SastLinkException(e.getMessage());
         }
-        return response.getBody();
+        CommonResponse commonResponse = Optional.ofNullable(response.getBody())
+                .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."));
+        if(!commonResponse.getSuccess()){
+            throw new SastLinkException("Error get userInfo: "+commonResponse);
+        }
+        Map<String, String> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
+        return new AccessTokenData(resultMap.get("access_token"),
+                Long.parseLong(resultMap.get("expires_in")),
+                resultMap.get("refresh_token"),
+                resultMap.get("scope"),
+                resultMap.get("token_type"));
     }
 
 
@@ -139,9 +151,12 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         } catch (RestClientException e) {
             throw new SastLinkException(e.getMessage());
         }
-        Map<String, String> resultMap = Optional.ofNullable(response.getBody())
-                .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."))
-                .getData();
+        CommonResponse commonResponse = Optional.ofNullable(response.getBody())
+                .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."));
+        if(!commonResponse.getSuccess()){
+            throw new SastLinkException("Error get userInfo: "+commonResponse);
+        }
+        Map<String, String> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
         return new UserInfo()
                 .setUserId(resultMap.get("userId"))
                 .setLink(resultMap.get("link"))
