@@ -155,7 +155,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         }
         Map<String, Object> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
         return new UserInfo()
-                .setHide((String) resultMap.get("hide"))
+                .setHide((List<String>) resultMap.get("hide"))
                 .setUserId((String) resultMap.get("userId"))
                 .setLink((List<String>) resultMap.get("link"))
                 .setAvatar((String) resultMap.get("avatar"))
@@ -163,7 +163,6 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 .setDep((String) resultMap.get("dep"))
                 .setBadge((String) resultMap.get("badge"))
                 .setEmail((String) resultMap.get("email"))
-                .setHide((String) resultMap.get("hide"))
                 .setNickname((String) resultMap.get("nickname"))
                 .setOrg((String) resultMap.get("org"));
     }

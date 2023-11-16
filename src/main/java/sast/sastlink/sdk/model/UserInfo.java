@@ -14,7 +14,7 @@ public class UserInfo {
     private String badge;
     private String bio;
     private String dep;
-    private String hide;
+    private List<String> hide;
     private List<String> link;
     private String nickname;
     private String org;
@@ -98,11 +98,11 @@ public class UserInfo {
         return this;
     }
 
-    public String getHide() {
+    public List<String> getHide() {
         return hide;
     }
 
-    public UserInfo setHide(String hide) {
+    public UserInfo setHide(List<String> hide) {
         this.hide = hide;
         return this;
     }
@@ -130,7 +130,7 @@ public class UserInfo {
     public UserInfo() {
     }
 
-    public UserInfo(String userId, String email, String avatar, String badge, String bio, String dep, String hide, List<String> link, String nickname, String org) {
+    public UserInfo(String userId, String email, String avatar, String badge, String bio, String dep, List<String> hide, List<String> link, String nickname, String org) {
         this.userId = userId;
         this.email = email;
         this.avatar = avatar;
