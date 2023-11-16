@@ -1,7 +1,6 @@
 package sast.sastlink.sdk.service.impl;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,6 +13,7 @@ import sast.sastlink.sdk.enums.Scope;
 import sast.sastlink.sdk.enums.State;
 import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.httpFactory.NoRedirectClientHttpRequestFactory;
+import sast.sastlink.sdk.model.Badge;
 import sast.sastlink.sdk.model.UserInfo;
 import sast.sastlink.sdk.model.response.AccessTokenData;
 import sast.sastlink.sdk.model.response.CommonResponse;
@@ -70,8 +70,8 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         }
         CommonResponse commonResponse = Optional.ofNullable(response.getBody())
                 .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."));
-        if(!commonResponse.getSuccess()){
-            throw new SastLinkException("Error get userInfo: "+commonResponse);
+        if (!commonResponse.getSuccess()) {
+            throw new SastLinkException("Error get userInfo: " + commonResponse);
         }
         Map<String, Object> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
         return new AccessTokenData((String) resultMap.get("access_token"),
@@ -107,7 +107,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             throw new SastLinkException(e.getMessage());
         }
         String queryString = redirect_uri.getQuery();
-        if(queryString.contains("error")){
+        if (queryString.contains("error")) {
             throw new SastLinkException("sast-link error: " + queryString);
         }
         return queryString.substring(queryString.indexOf("code=") + 5, queryString.indexOf("&state="));
@@ -150,24 +150,22 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
         }
         CommonResponse commonResponse = Optional.ofNullable(response.getBody())
                 .orElseThrow(() -> new SastLinkException("Error get userInfo by accessToken, return value is null."));
-        if(!commonResponse.getSuccess()){
-            throw new SastLinkException("Error get userInfo: "+commonResponse);
+        if (!commonResponse.getSuccess()) {
+            throw new SastLinkException("Error get userInfo: " + commonResponse);
         }
         Map<String, Object> resultMap = Optional.ofNullable(commonResponse.getData()).orElse(Collections.emptyMap());
         return new UserInfo()
-                .setHide((String) resultMap.get("hide"))
+                .setHide((List<String>) resultMap.get("hide"))
                 .setUserId((String) resultMap.get("userId"))
                 .setLink((List<String>) resultMap.get("link"))
                 .setAvatar((String) resultMap.get("avatar"))
                 .setBio((String) resultMap.get("bio"))
                 .setDep((String) resultMap.get("dep"))
-                .setBadge((String) resultMap.get("badge"))
+                .setBadge((Badge) resultMap.get("badge"))
                 .setEmail((String) resultMap.get("email"))
-                .setHide((String) resultMap.get("hide"))
                 .setNickname((String) resultMap.get("nickname"))
                 .setOrg((String) resultMap.get("org"));
     }
-
 
 
     @Override

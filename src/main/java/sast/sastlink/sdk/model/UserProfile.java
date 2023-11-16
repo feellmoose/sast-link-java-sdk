@@ -34,8 +34,8 @@ public class UserProfile {
         this.email = userInfo.getEmail();
         this.biography = userInfo.getBio();
         this.link = userInfo.getLink();
-        this.badge = getBadgeFromJson(userInfo.getBadge());
-        this.hide = getHideFromJson(userInfo.getHide());
+        this.badge = userInfo.getBadge();
+        this.hide = userInfo.getHide();
         this.careerRecord = getCareerRecordFromJson(null);
     }
     private Organization getOrg(String org){
