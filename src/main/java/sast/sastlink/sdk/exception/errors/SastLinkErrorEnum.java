@@ -10,7 +10,7 @@ public enum SastLinkErrorEnum {
     NULL_RESPONSE_BODY("response body is null"),
     EMPTY_RESPONSE_BODY("response body is empty"),
     ERROR_DECODE("error decode data from sast-link"),
-    IO_ERROR("I/O error")
-    ;
+    ERROR_ENCODE("error encode data for sast-link"),
+    IO_ERROR("I/O error");
     final private String message;
 }

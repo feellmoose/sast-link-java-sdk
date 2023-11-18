@@ -1,11 +1,11 @@
 package sast.sastlink.sdk.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import sast.sastlink.sdk.exception.errors.SastLinkErrorEnum;
-import sast.sastlink.sdk.model.response.CommonResponse;
+import sast.sastlink.sdk.model.response.SastLinkResponse;
+import sast.sastlink.sdk.util.JsonUtil;
 
 import java.util.Optional;
 
@@ -19,7 +19,12 @@ public class SastLinkException extends RuntimeException {
     private final SastLinkErrorEnum errorEnum;
 
     public SastLinkException(String message) {
-        super(getErrMsg(message));
+        super(message);
+        this.errorEnum = SastLinkErrorEnum.COMMON_ERROR;
+    }
+
+    public SastLinkException(SastLinkResponse<?> response) {
+        super(getErrorMessage(response));
         this.errorEnum = SastLinkErrorEnum.COMMON_ERROR;
     }
 
@@ -27,7 +32,6 @@ public class SastLinkException extends RuntimeException {
         super(getErrorMessage(errorEnum, null));
         this.errorEnum = Optional.ofNullable(errorEnum).orElse(SastLinkErrorEnum.COMMON_ERROR);
     }
-
 
     public SastLinkException(Throwable throwable) {
         super(getErrorMessage(SastLinkErrorEnum.COMMON_ERROR, throwable));
@@ -49,36 +53,26 @@ public class SastLinkException extends RuntimeException {
                 .append(errorEnum.getMessage());
         if (throwable != null) {
             String msg = throwable.getMessage();
-            if (msg.contains(" Exception: Bad Request:")) {
-                try {
-                    CommonResponse commonResponse = new ObjectMapper().readValue(msg.substring(msg.indexOf("Bad Request:") + 14, msg.length() - 1), CommonResponse.class);
-                    errorMessageBuilder
-                            .append(" Bad Request: sast-link error ErrCode: ")
-                            .append(commonResponse.getErrCode())
-                            .append(", ErrMsg:")
-                            .append(commonResponse.getErrMsg());
-                } catch (JsonProcessingException e) {
-                    errorMessageBuilder.append(msg);
-                }
+            //append if msg is from sast-link
+            if (msg.contains("Bad Request:")) {
+                SastLinkResponse<?> sastLinkResponse = JsonUtil.fromJson(msg.substring(msg.indexOf("Bad Request:") + 14, msg.length() - 1), SastLinkResponse.class);
+                errorMessageBuilder
+                        .append(" Exception: Bad Request: sast-link error ErrCode: ")
+                        .append(sastLinkResponse.getErrCode())
+                        .append(", ErrMsg:")
+                        .append(sastLinkResponse.getErrMsg());
             }
         }
         return errorMessageBuilder.toString();
     }
 
-
-    private static String getErrMsg(@Nullable String msg) {
-        if (msg == null) {
-            return "";
+    private static String getErrorMessage(@NonNull SastLinkResponse<?> response) {
+        if (response.isSuccess()) {
+            return "logic error, message needs to be handled successfully: " + response;
+        } else {
+            return "Exception: sast-link error " +
+                    "RESPONSE: ErrCode: " + response.getErrCode() + ", ErrMsg:" + response.getErrMsg();
         }
-        if (msg.contains("Bad Request:")) {
-            try {
-                CommonResponse commonResponse = new ObjectMapper().readValue(msg.substring(msg.indexOf("Bad Request:") + 14, msg.length() - 1), CommonResponse.class);
-                return "ErrCode:" + commonResponse.getErrCode() + ", ErrMsg:" + commonResponse.getErrMsg();
-            } catch (JsonProcessingException e) {
-                return msg;
-            }
-        }
-        return msg;
     }
 
 }

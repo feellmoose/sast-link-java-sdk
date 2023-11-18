@@ -1,5 +1,6 @@
 package sast.sastlink.sdk.model.response.data;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,9 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccessToken implements BaseData {
-    private String access_token;
-    private Integer expires_in;
-    private String refresh_token;
+    @JsonAlias("access_token")
+    private String accessToken;
+    @JsonAlias("expires_in")
+    private Integer expiresIn;
+    @JsonAlias("refresh_token")
+    private String refreshToken;
     private String scope;
-    private String token_type;
+    @JsonAlias("token_type")
+    private String tokenType;
 }

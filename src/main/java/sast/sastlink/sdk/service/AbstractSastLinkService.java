@@ -1,9 +1,6 @@
 package sast.sastlink.sdk.service;
 
 
-import lombok.Builder;
-import sast.sastlink.sdk.service.impl.RestTemplateSastLinkService;
-
 public abstract class AbstractSastLinkService<T extends AbstractSastLinkService<T>> implements SastLinkService<T> {
     protected static final String authorize_response_type = "code";
     protected final String client_id;
