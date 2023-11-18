@@ -18,6 +18,7 @@ import sast.sastlink.sdk.model.UserInfo;
 import sast.sastlink.sdk.model.response.AccessTokenData;
 import sast.sastlink.sdk.model.response.CommonResponse;
 import sast.sastlink.sdk.model.response.RefreshResponse;
+import sast.sastlink.sdk.service.AbstractSastLinkService;
 import sast.sastlink.sdk.service.SastLinkService;
 
 import java.net.URI;
@@ -31,19 +32,11 @@ import java.util.*;
  * @date: 2023/7/16 16:02
  */
 
-public class RestTemplateSastLinkService extends AbstractSastLinkService {
-    private final RestTemplate restTemplate = getDefaultRestTemplate();
-    private static final String authorize_response_type = "code";
+public class RestTemplateSastLinkService extends AbstractSastLinkService<RestTemplateSastLinkService> {
+    private RestTemplate restTemplate;
 
     public static Builder Builder() {
         return new Builder();
-    }
-
-    private static RestTemplate getDefaultRestTemplate() {
-        SimpleClientHttpRequestFactory factory = new NoRedirectClientHttpRequestFactory();
-        factory.setReadTimeout(5000);
-        factory.setConnectTimeout(5000);
-        return new RestTemplate(factory);
     }
 
     @Override
@@ -82,7 +75,6 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
     }
 
 
-    @Override
     public String authorize(String token, String code_challenge, String code_challenge_method) throws SastLinkException {
         URI uri;
         try {
@@ -168,7 +160,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
     }
 
 
-    @Override
+
     public String login(String email, String password) throws SastLinkException {
         String loginTicket = verifyAccount(email, "1");
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -192,7 +184,7 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
                 .orElseThrow(() -> new SastLinkException("error, no loginToken in response.\nerror response value: " + commonResponse));
     }
 
-    @Override
+
     public boolean logout(String token) throws SastLinkException {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("TOKEN", token);
@@ -236,16 +228,35 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
 
     private RestTemplateSastLinkService(Builder builder) {
         super(builder);
+        this.restTemplate = builder.restTemplate;
     }
 
-    public static class Builder extends AbstractSastLinkService.Builder<Builder> {
+
+    private void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public static class Builder extends AbstractSastLinkService.Builder<RestTemplateSastLinkService> {
+        private Builder() {
+        }
+
+        private RestTemplate restTemplate;
+
         @Override
         protected Builder self() {
             return this;
         }
 
+        private static RestTemplate getDefaultRestTemplate() {
+            SimpleClientHttpRequestFactory factory = new NoRedirectClientHttpRequestFactory();
+            factory.setReadTimeout(5000);
+            factory.setConnectTimeout(5000);
+            return new RestTemplate(factory);
+        }
+
         @Override
-        public SastLinkService build() {
+        public RestTemplateSastLinkService build() {
+            //检查参数
             if (this.redirect_uri.isEmpty() || this.client_id.isEmpty() || this.client_secret.isEmpty()) {
                 throw new SastLinkException("redirect_uri, client_id or client_secret not exist");
             }
@@ -254,6 +265,9 @@ public class RestTemplateSastLinkService extends AbstractSastLinkService {
             }
             if (this.code_verifier.isEmpty()) {
                 throw new SastLinkException("code_verifier is needed in building a sastLinkService");
+            }
+            if (this.restTemplate == null) {
+                this.restTemplate = getDefaultRestTemplate();
             }
             return new RestTemplateSastLinkService(this);
         }

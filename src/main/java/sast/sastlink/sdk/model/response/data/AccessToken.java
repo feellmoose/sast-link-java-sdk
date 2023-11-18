@@ -1,18 +1,13 @@
-package sast.sastlink.sdk.model.response;
+package sast.sastlink.sdk.model.response.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @projectName: sast-link-SDK
- * @author: feelMoose
- * @date: 2023/8/19 21:23
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccessTokenData {
+public class AccessToken implements BaseData {
     private String access_token;
     private Integer expires_in;
     private String refresh_token;

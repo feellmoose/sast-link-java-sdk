@@ -4,20 +4,15 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sast.sastlink.sdk.model.response.data.BaseData;
 
-import java.util.Map;
 
-/**
- * @projectName: sast-link-SDK
- * @author: feelMoose
- * @date: 2023/8/19 21:42
- */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CommonResponse {
+@AllArgsConstructor
+public class SastLinkResponse<T extends BaseData> {
     @JsonAlias("Data")
-    private Map<String, Object> data;
+    private T data;
     @JsonAlias("ErrCode")
     private Integer errCode;
     @JsonAlias("ErrMsg")
@@ -25,7 +20,3 @@ public class CommonResponse {
     @JsonAlias("Success")
     private boolean success;
 }
-
-
-
-
