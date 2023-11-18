@@ -1,10 +1,13 @@
 package sast.sastlink.sdk.enums;
 
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Getter
 public enum Organization {
     C_SHARP(1, Department.Software_R_D, "C#组"),
     CPP(2, Department.Software_R_D, "C++组"),
@@ -48,17 +51,6 @@ public enum Organization {
         this.org = org;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public Department getDep() {
-        return dep;
-    }
-
-    public String getOrg() {
-        return org;
-    }
 
     private static final Map<Integer, Organization> orgId2Dep = Arrays.stream(values()).collect(Collectors.toMap(Organization::getId, organization -> organization));
 

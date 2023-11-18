@@ -1,8 +1,8 @@
 package sast.sastlink.sdk.exception;
 
 import lombok.Getter;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sast.sastlink.sdk.exception.errors.SastLinkErrorEnum;
 import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.util.JsonUtil;
@@ -66,7 +66,7 @@ public class SastLinkException extends RuntimeException {
         return errorMessageBuilder.toString();
     }
 
-    private static String getErrorMessage(@NonNull SastLinkResponse<?> response) {
+    private static String getErrorMessage(@NotNull SastLinkResponse<?> response) {
         if (response.isSuccess()) {
             return "logic error, message needs to be handled successfully: " + response;
         } else {

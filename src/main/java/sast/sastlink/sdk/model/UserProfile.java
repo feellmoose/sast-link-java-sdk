@@ -1,14 +1,9 @@
 package sast.sastlink.sdk.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import sast.sastlink.sdk.enums.Organization;
-import sast.sastlink.sdk.exception.SastLinkException;
 
 import java.util.List;
 
@@ -42,8 +37,9 @@ public class UserProfile {
         this.badge = userInfo.getBadge();
         this.hide = userInfo.getHide();
     }
-    private Organization getOrg(String org){
-        if(org == null||org.isEmpty()){
+
+    private Organization getOrg(String org) {
+        if (org == null || org.isEmpty()) {
             return null;
         }
         return Organization.valueOf(org);
