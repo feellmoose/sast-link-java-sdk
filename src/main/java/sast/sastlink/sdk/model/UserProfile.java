@@ -42,6 +42,6 @@ public class UserProfile {
         if (org == null || org.isEmpty()) {
             return null;
         }
-        return Organization.valueOf(org);
+        return Organization.getByStr(org);
     }
 }

@@ -51,12 +51,15 @@ public enum Organization {
         this.org = org;
     }
 
-
     private static final Map<Integer, Organization> orgId2Dep = Arrays.stream(values()).collect(Collectors.toMap(Organization::getId, organization -> organization));
+    private static final Map<String, Organization> orgStr2Dep = Arrays.stream(values()).collect(Collectors.toMap(Organization::getOrg, organization -> organization));
 
     public static Organization getById(Integer id) {
         return orgId2Dep.get(id);
     }
 
+    public static Organization getByStr(String str) {
+        return orgStr2Dep.get(str);
+    }
 
 }
