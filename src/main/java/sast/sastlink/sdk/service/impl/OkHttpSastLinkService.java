@@ -16,7 +16,7 @@ import sast.sastlink.sdk.util.JsonUtil;
 import java.io.IOException;
 
 public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLinkService> {
-    private OkHttpClient okHttpClient;
+    private final OkHttpClient okHttpClient;
 
     public static OkHttpSastLinkService.Builder Builder() {
         return new OkHttpSastLinkService.Builder();
@@ -92,13 +92,9 @@ public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLin
         String body;
         try {
             ResponseBody responseBody = okHttpClient.newCall(request).execute().body();
-            if (responseBody == null) {
-                throw new SastLinkException(SastLinkErrorEnum.NULL_RESPONSE_BODY);
-            }
+            if (responseBody == null) throw new SastLinkException(SastLinkErrorEnum.NULL_RESPONSE_BODY);
             body = responseBody.string();
-            if (body.isEmpty()) {
-                throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
-            }
+            if (body.isEmpty()) throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
         } catch (IOException e) {
             throw new SastLinkException(SastLinkErrorEnum.IO_ERROR, e);
         }
@@ -117,22 +113,13 @@ public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLin
         }
 
         @Override
-        protected OkHttpSastLinkService.Builder self() {
+        protected Builder self() {
             return this;
         }
 
         @Override
         public OkHttpSastLinkService build() {
-            //检查参数
-            if (this.redirect_uri.isEmpty() || this.client_id.isEmpty() || this.client_secret.isEmpty()) {
-                throw new SastLinkException("redirect_uri, client_id or client_secret not exist");
-            }
-            if (this.host_name.isEmpty()) {
-                throw new SastLinkException("sast-link server host_name is needed in building a sastLinkService");
-            }
-            if (this.code_verifier.isEmpty()) {
-                throw new SastLinkException("code_verifier is needed in building a sastLinkService");
-            }
+            super.build();
             if (okHttpClient == null) {
                 okHttpClient = new OkHttpClient();
             }

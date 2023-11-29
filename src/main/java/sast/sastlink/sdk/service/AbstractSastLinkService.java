@@ -1,6 +1,8 @@
 package sast.sastlink.sdk.service;
 
 
+import sast.sastlink.sdk.exception.SastLinkException;
+
 public abstract class AbstractSastLinkService<T extends AbstractSastLinkService<T>> implements SastLinkService<T> {
     protected static final String authorize_response_type = "code";
     protected final String client_id;
@@ -54,6 +56,20 @@ public abstract class AbstractSastLinkService<T extends AbstractSastLinkService<
 
         protected abstract Builder<T> self();
 
+        @Override
+        public T build() {
+            //检查参数
+            if (this.redirect_uri.isEmpty() || this.client_id.isEmpty() || this.client_secret.isEmpty()) {
+                throw new SastLinkException("redirect_uri, client_id or client_secret not exist");
+            }
+            if (this.host_name.isEmpty()) {
+                throw new SastLinkException("sast-link server host_name is needed in building a sastLinkService");
+            }
+            if (this.code_verifier.isEmpty()) {
+                throw new SastLinkException("code_verifier is needed in building a sastLinkService");
+            }
+            return (T) null;
+        }
     }
 
 }
