@@ -3,8 +3,7 @@ package sast.sastlink.sdk.service;
 
 import sast.sastlink.sdk.exception.SastLinkException;
 
-public abstract class AbstractSastLinkService<T extends AbstractSastLinkService<T>> implements SastLinkService<T> {
-    protected static final String authorize_response_type = "code";
+public abstract class AbstractSastLinkService<T extends AbstractSastLinkService<T>> implements SastLinkService {
     protected final String client_id;
     protected final String client_secret;
     protected final String code_verifier;

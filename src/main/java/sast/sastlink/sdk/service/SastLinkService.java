@@ -5,7 +5,7 @@ import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
 
-public interface SastLinkService<T extends SastLinkService<T>> {
+public interface SastLinkService {
     AccessToken accessToken(String code) throws SastLinkException;
 
     /* 刷新accessToken */
@@ -14,7 +14,7 @@ public interface SastLinkService<T extends SastLinkService<T>> {
     /* 使用accessToken获取用户信息 */
     User user(String accessToken) throws SastLinkException;
 
-    interface Builder<T extends SastLinkService<T>> {
+    interface Builder<T extends SastLinkService> {
         T build();
     }
 
