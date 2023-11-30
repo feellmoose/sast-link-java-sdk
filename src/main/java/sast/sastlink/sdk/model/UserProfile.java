@@ -1,11 +1,9 @@
 package sast.sastlink.sdk.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import sast.sastlink.sdk.enums.Organization;
-import sast.sastlink.sdk.exception.SastLinkException;
 
 import java.util.List;
 
@@ -14,6 +12,9 @@ import java.util.List;
  * @author: feelMoose
  * @date: 2023/8/19 15:12
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserProfile {
     private String nickname;
     private String avatar;
@@ -24,7 +25,6 @@ public class UserProfile {
     private List<String> link;
     private Badge badge;
     private List<String> hide;
-    private List<CareerRecord> careerRecord;
 
     public UserProfile(UserInfo userInfo) {
         this.nickname = userInfo.getNickname();
@@ -36,80 +36,12 @@ public class UserProfile {
         this.link = userInfo.getLink();
         this.badge = userInfo.getBadge();
         this.hide = userInfo.getHide();
-        this.careerRecord = getCareerRecordFromJson(null);
     }
-    private Organization getOrg(String org){
-        if(org == null||org.isEmpty()){
+
+    private Organization getOrg(String org) {
+        if (org == null || org.isEmpty()) {
             return null;
         }
-        return Organization.valueOf(org);
-    }
-    private Badge getBadgeFromJson(String badgeJson){
-        return null;
-    }
-
-    private List<String> getHideFromJson(String hideJson){
-        return null;
-    }
-
-    private List<CareerRecord> getCareerRecordFromJson(String careerRecord){
-        return null;
-    }
-
-
-    @Override
-    public String toString() {
-        return "UserProfile{" +
-                "nickname='" + nickname + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", dep='" + dep + '\'' +
-                ", organization=" + organization +
-                ", email='" + email + '\'' +
-                ", biography='" + biography + '\'' +
-                ", link=" + link +
-                ", badge=" + badge +
-                ", hide=" + hide +
-                ", careerRecord=" + careerRecord +
-                '}';
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public String getDep() {
-        return dep;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getBiography() {
-        return biography;
-    }
-
-    public List<String> getLink() {
-        return link;
-    }
-
-    public Badge getBadge() {
-        return badge;
-    }
-
-    public List<String> getHide() {
-        return hide;
-    }
-
-    public List<CareerRecord> getCareerRecord() {
-        return careerRecord;
+        return Organization.getByStr(org);
     }
 }
