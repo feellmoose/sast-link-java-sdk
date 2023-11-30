@@ -14,7 +14,7 @@ public interface SastLinkService {
     /* 使用accessToken获取用户信息 */
     User user(String accessToken) throws SastLinkException;
 
-    interface Builder<T extends SastLinkService> {
+    interface Builder<T extends SastLinkService,B extends Builder<T,B>> {
         T build();
     }
 

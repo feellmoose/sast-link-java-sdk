@@ -28,7 +28,7 @@ public final class HttpClientSastLinkService extends AbstractSastLinkService<Htt
     private final HttpClient httpClient;
     private static final String boundary = new BigInteger(256, new Random()).toString();
 
-    public static HttpClientSastLinkService.Builder Builder() {
+    public static HttpClientSastLinkService.Builder builder() {
         return new HttpClientSastLinkService.Builder();
     }
 
@@ -116,15 +116,12 @@ public final class HttpClientSastLinkService extends AbstractSastLinkService<Htt
         return user;
     }
 
-    public static class Builder extends AbstractSastLinkService.Builder<HttpClientSastLinkService> {
+    public static class Builder extends AbstractSastLinkService.Builder<HttpClientSastLinkService,Builder> {
         private HttpClient httpClient;
 
         public Builder setHttpClient(HttpClient httpClient) {
             this.httpClient = httpClient;
             return this;
-        }
-
-        private Builder() {
         }
 
         @Override

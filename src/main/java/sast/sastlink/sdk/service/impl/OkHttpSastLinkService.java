@@ -17,7 +17,7 @@ import java.io.IOException;
 public final class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLinkService> {
     private final OkHttpClient okHttpClient;
 
-    public static OkHttpSastLinkService.Builder Builder() {
+    public static OkHttpSastLinkService.Builder builder() {
         return new OkHttpSastLinkService.Builder();
     }
 
@@ -100,15 +100,12 @@ public final class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpS
         return body;
     }
 
-    public static class Builder extends AbstractSastLinkService.Builder<OkHttpSastLinkService> {
+    public static class Builder extends AbstractSastLinkService.Builder<OkHttpSastLinkService,Builder> {
         private OkHttpClient okHttpClient;
 
         public Builder setOkHttpClient(OkHttpClient okHttpClient) {
             this.okHttpClient = okHttpClient;
             return this;
-        }
-
-        private Builder() {
         }
 
         @Override

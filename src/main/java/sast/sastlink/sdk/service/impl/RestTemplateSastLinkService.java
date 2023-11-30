@@ -20,7 +20,7 @@ import sast.sastlink.sdk.util.JsonUtil;
 public final class RestTemplateSastLinkService extends AbstractSastLinkService<RestTemplateSastLinkService> {
     private final RestTemplate restTemplate;
 
-    public static RestTemplateSastLinkService.Builder Builder() {
+    public static RestTemplateSastLinkService.Builder builder() {
         return new RestTemplateSastLinkService.Builder();
     }
 
@@ -92,15 +92,12 @@ public final class RestTemplateSastLinkService extends AbstractSastLinkService<R
     }
 
 
-    public static class Builder extends AbstractSastLinkService.Builder<RestTemplateSastLinkService> {
+    public static class Builder extends AbstractSastLinkService.Builder<RestTemplateSastLinkService,Builder> {
         private RestTemplate restTemplate;
 
         public Builder setRestTemplate(RestTemplate restTemplate) {
             this.restTemplate = restTemplate;
             return this;
-        }
-
-        private Builder() {
         }
 
         @Override
