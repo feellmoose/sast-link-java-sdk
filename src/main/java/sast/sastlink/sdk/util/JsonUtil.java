@@ -4,16 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import sast.sastlink.sdk.exception.SastLinkException;
-import sast.sastlink.sdk.exception.errors.SastLinkErrorEnum;
+import sast.sastlink.sdk.enums.SastLinkErrorEnum;
 
 public class JsonUtil {
 
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static String toJson(Object o) {
+    public static <T> String toJson(T t) {
         String json;
         try {
-            json = objectMapper.writeValueAsString(o);
+            json = objectMapper.writeValueAsString(t);
         } catch (JsonProcessingException e) {
             throw new SastLinkException(SastLinkErrorEnum.ERROR_ENCODE, e);
         }
