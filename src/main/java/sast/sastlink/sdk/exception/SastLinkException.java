@@ -3,7 +3,7 @@ package sast.sastlink.sdk.exception;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sast.sastlink.sdk.exception.errors.SastLinkErrorEnum;
+import sast.sastlink.sdk.enums.SastLinkErrorEnum;
 import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.util.JsonUtil;
 

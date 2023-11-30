@@ -5,7 +5,7 @@ import okhttp3.*;
 import sast.sastlink.sdk.enums.GrantType;
 import sast.sastlink.sdk.enums.SastLinkApi;
 import sast.sastlink.sdk.exception.SastLinkException;
-import sast.sastlink.sdk.exception.errors.SastLinkErrorEnum;
+import sast.sastlink.sdk.enums.SastLinkErrorEnum;
 import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
@@ -29,18 +29,18 @@ public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLin
 
     @Override
     public AccessToken accessToken(String code) throws SastLinkException {
-        HttpUrl url = HttpUrl.get(SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name)).newBuilder()
-                .addQueryParameter("code", code)
-                .addQueryParameter("code_verifier", this.code_verifier)
-                .addQueryParameter("grant_type", GrantType.AUTHORIZATION_CODE.name)
-                .addQueryParameter("redirect_uri", this.redirect_uri)
-                .addQueryParameter("client_id", this.client_id)
-                .addQueryParameter("client_secret", this.client_secret)
-                .build();
+        HttpUrl url = HttpUrl.get(SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name));
+        FormBody formBody = new FormBody.Builder()
+                .add(CODE, code)
+                .add(CODE_VERIFIER, code_verifier)
+                .add(GRANT_TYPE, GrantType.AUTHORIZATION_CODE.name)
+                .add(REDIRECT_URI, redirect_uri)
+                .add(CLIENT_ID, client_id)
+                .add(CLIENT_SECRET, client_secret).build();
         Request request = new Request.Builder()
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .url(url.url())
-                .method("POST", RequestBody.create("".getBytes()))
+                .header(CONTENT_TYPE, "multipart/form-data")
+                .url(url)
+                .method("POST", formBody)
                 .build();
         String body = exchangeForResponseBody(request);
         SastLinkResponse<AccessToken> response = JsonUtil.fromJson(body, new TypeReference<>() {
@@ -53,14 +53,14 @@ public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLin
 
     @Override
     public RefreshToken refreshToken(String refreshToken) throws SastLinkException {
-        HttpUrl url = HttpUrl.get(SastLinkApi.REFRESH.getHttpURI(host_name)).newBuilder()
-                .addQueryParameter("refresh_token", refreshToken)
-                .addQueryParameter("grant_type", GrantType.REFRESH_TOKEN.name)
-                .build();
+        HttpUrl url = HttpUrl.get(SastLinkApi.REFRESH.getHttpURI(host_name));
+        FormBody formBody = new FormBody.Builder()
+                .add(REFRESH_TOKEN, refreshToken)
+                .add(GRANT_TYPE, GrantType.REFRESH_TOKEN.name).build();
         Request request = new Request.Builder()
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .url(url.url())
-                .method("POST", RequestBody.create("".getBytes()))
+                .header(CONTENT_TYPE, "multipart/form-data")
+                .url(url)
+                .method("POST", formBody)
                 .build();
         String body = exchangeForResponseBody(request);
         SastLinkResponse<RefreshToken> response = JsonUtil.fromJson(body, new TypeReference<>() {
@@ -73,10 +73,10 @@ public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLin
 
     @Override
     public User user(String accessToken) throws SastLinkException {
-        HttpUrl url = HttpUrl.get(SastLinkApi.USER_INFO.getHttpURI(host_name)).newBuilder().build();
+        HttpUrl url = HttpUrl.get(SastLinkApi.USER_INFO.getHttpURI(host_name));
         Request request = new Request.Builder()
-                .header("Authorization", "Bearer " + accessToken)
-                .url(url.url())
+                .header(AUTHORIZATION, "Bearer " + accessToken)
+                .url(url)
                 .get()
                 .build();
         String body = exchangeForResponseBody(request);
@@ -104,7 +104,7 @@ public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLin
     public static class Builder extends AbstractSastLinkService.Builder<OkHttpSastLinkService> {
         private OkHttpClient okHttpClient;
 
-        private Builder setOkHttpClient(OkHttpClient okHttpClient) {
+        public Builder setOkHttpClient(OkHttpClient okHttpClient) {
             this.okHttpClient = okHttpClient;
             return this;
         }

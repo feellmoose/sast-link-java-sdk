@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import sast.sastlink.sdk.enums.GrantType;
 import sast.sastlink.sdk.enums.SastLinkApi;
 import sast.sastlink.sdk.exception.SastLinkException;
-import sast.sastlink.sdk.exception.errors.SastLinkErrorEnum;
+import sast.sastlink.sdk.enums.SastLinkErrorEnum;
 import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
@@ -13,13 +13,21 @@ import sast.sastlink.sdk.service.AbstractSastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 import java.io.IOException;
-import java.net.URI;
+import java.math.BigInteger;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClientSastLinkService> {
     private final HttpClient httpClient;
+    private static final String boundary = new BigInteger(256, new Random()).toString();
 
     public static HttpClientSastLinkService.Builder Builder() {
         return new HttpClientSastLinkService.Builder();
@@ -32,16 +40,16 @@ public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClien
 
     @Override
     public AccessToken accessToken(String code) throws SastLinkException {
-        String str = SastLinkApi.ACCESS_TOKEN.getHttp(host_name) +
-                "?code=" + code +
-                "&code_verifier=" + this.code_verifier +
-                "&grant_type=" + GrantType.AUTHORIZATION_CODE.name +
-                "&redirect_uri=" + this.redirect_uri +
-                "&client_id=" + this.client_id +
-                "&client_secret=" + this.client_secret;
-        HttpRequest request = HttpRequest.newBuilder(URI.create(str))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.noBody())
+        Map<Object, Object> data = Map.of(
+                CODE, code,
+                CODE_VERIFIER, code_verifier,
+                GRANT_TYPE, GrantType.AUTHORIZATION_CODE.name,
+                REDIRECT_URI, this.redirect_uri,
+                CLIENT_ID, this.client_id,
+                CLIENT_SECRET, this.client_secret);
+        HttpRequest request = HttpRequest.newBuilder(SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name))
+                .header(CONTENT_TYPE, "multipart/form-data;boundary=" + boundary)
+                .POST(ofMimeMultipartData(data))
                 .build();
         AccessToken accessToken;
         try {
@@ -62,12 +70,12 @@ public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClien
 
     @Override
     public RefreshToken refreshToken(String refreshToken) throws SastLinkException {
-        String str = SastLinkApi.REFRESH.getHttp(host_name) +
-                "?refresh_token=" + refreshToken +
-                "&grant_type=" + GrantType.REFRESH_TOKEN.name;
-        HttpRequest request = HttpRequest.newBuilder(URI.create(str))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.noBody())
+        Map<Object, Object> data = Map.of(
+                REFRESH_TOKEN, refreshToken,
+                GRANT_TYPE, GrantType.REFRESH_TOKEN.name);
+        HttpRequest request = HttpRequest.newBuilder(SastLinkApi.REFRESH.getHttpURI(host_name))
+                .header(CONTENT_TYPE, "multipart/form-data;boundary=" + boundary)
+                .POST(ofMimeMultipartData(data))
                 .build();
         RefreshToken refresh;
         try {
@@ -89,7 +97,7 @@ public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClien
     @Override
     public User user(String accessToken) throws SastLinkException {
         HttpRequest request = HttpRequest.newBuilder(SastLinkApi.USER_INFO.getHttpURI(host_name))
-                .header("Authorization", "Bearer " + accessToken)
+                .header(AUTHORIZATION, "Bearer " + accessToken)
                 .GET()
                 .build();
         User user;
@@ -112,7 +120,7 @@ public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClien
     public static class Builder extends AbstractSastLinkService.Builder<HttpClientSastLinkService> {
         private HttpClient httpClient;
 
-        private Builder setHttpClient(HttpClient httpClient) {
+        public Builder setHttpClient(HttpClient httpClient) {
             this.httpClient = httpClient;
             return this;
         }
@@ -133,5 +141,38 @@ public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClien
             }
             return new HttpClientSastLinkService(this);
         }
+    }
+
+
+    private static HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data) {
+        // Result request body
+        List<byte[]> byteArrays = new ArrayList<>();
+        // Separator with boundary
+        byte[] separator = ("--" + boundary + "\r\nContent-Disposition: form-data; name=").getBytes(StandardCharsets.UTF_8);
+        // Iterating over data parts
+        try {
+            for (Map.Entry<Object, Object> entry : data.entrySet()) {
+                // Opening boundary
+                byteArrays.add(separator);
+                // If value is type of Path (file) append content type with file name and file binaries, otherwise simply append key=value
+                if (entry.getValue() instanceof Path) {
+                    var path = (Path) entry.getValue();
+                    String mimeType = Files.probeContentType(path);
+                    byteArrays.add(("\"" + entry.getKey() + "\"; filename=\"" + path.getFileName()
+                            + "\"\r\nContent-Type: " + mimeType + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+                    byteArrays.add(Files.readAllBytes(path));
+                    byteArrays.add("\r\n".getBytes(StandardCharsets.UTF_8));
+                } else {
+                    byteArrays.add(("\"" + entry.getKey() + "\"\r\n\r\n" + entry.getValue() + "\r\n")
+                            .getBytes(StandardCharsets.UTF_8));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // Closing boundary
+        byteArrays.add(("--" + boundary + "--").getBytes(StandardCharsets.UTF_8));
+        // Serializing as byte array
+        return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
     }
 }

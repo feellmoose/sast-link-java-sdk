@@ -1,4 +1,4 @@
-package sast.sastlink.sdk.exception.errors;
+package sast.sastlink.sdk.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
