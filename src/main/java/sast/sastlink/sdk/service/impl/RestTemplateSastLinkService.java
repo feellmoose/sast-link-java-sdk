@@ -14,11 +14,10 @@ import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
-import sast.sastlink.sdk.service.AbstractSastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 
-public class RestTemplateSastLinkService extends AbstractSastLinkService<RestTemplateSastLinkService> {
+public final class RestTemplateSastLinkService extends AbstractSastLinkService<RestTemplateSastLinkService> {
     private final RestTemplate restTemplate;
 
     public static RestTemplateSastLinkService.Builder Builder() {

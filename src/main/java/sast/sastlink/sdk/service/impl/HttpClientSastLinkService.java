@@ -9,7 +9,6 @@ import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
-import sast.sastlink.sdk.service.AbstractSastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClientSastLinkService> {
+public final class HttpClientSastLinkService extends AbstractSastLinkService<HttpClientSastLinkService> {
     private final HttpClient httpClient;
     private static final String boundary = new BigInteger(256, new Random()).toString();
 
@@ -33,7 +32,7 @@ public class HttpClientSastLinkService extends AbstractSastLinkService<HttpClien
         return new HttpClientSastLinkService.Builder();
     }
 
-    protected HttpClientSastLinkService(Builder builder) {
+    private HttpClientSastLinkService(Builder builder) {
         super(builder);
         this.httpClient = builder.httpClient;
     }

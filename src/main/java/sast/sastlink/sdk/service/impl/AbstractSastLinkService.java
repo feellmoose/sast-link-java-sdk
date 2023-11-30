@@ -1,10 +1,11 @@
-package sast.sastlink.sdk.service;
+package sast.sastlink.sdk.service.impl;
 
 
 import sast.sastlink.sdk.constants.LinkParamConstants;
 import sast.sastlink.sdk.exception.SastLinkException;
+import sast.sastlink.sdk.service.SastLinkService;
 
-public abstract class AbstractSastLinkService<T extends AbstractSastLinkService<T>> implements SastLinkService, LinkParamConstants {
+public sealed abstract class AbstractSastLinkService<T extends AbstractSastLinkService<T>> implements SastLinkService, LinkParamConstants permits HttpClientSastLinkService, OkHttpSastLinkService, RestTemplateSastLinkService {
     protected final String client_id;
     protected final String client_secret;
     protected final String code_verifier;

@@ -10,19 +10,18 @@ import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
-import sast.sastlink.sdk.service.AbstractSastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 import java.io.IOException;
 
-public class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLinkService> {
+public final class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLinkService> {
     private final OkHttpClient okHttpClient;
 
     public static OkHttpSastLinkService.Builder Builder() {
         return new OkHttpSastLinkService.Builder();
     }
 
-    protected OkHttpSastLinkService(Builder builder) {
+    private OkHttpSastLinkService(Builder builder) {
         super(builder);
         this.okHttpClient = builder.okHttpClient;
     }
