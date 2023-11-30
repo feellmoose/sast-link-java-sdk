@@ -38,172 +38,24 @@
 
 ### 使用示例
 
-#### 一，Spring环境
-
-1. 注册Bean
-
 ~~~java
-package fun.sast.example;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
-import sast.sastlink.sdk.service.SastLinkService;
-import sast.sastlink.sdk.service.impl.RestTemplateSastLinkService;
-
-@Configuration
-public class SastLinkServiceConfig {
-
-    @Bean
-    public SastLinkService sastLinkService(RestTemplate restTemplate) {
-        return RestTemplateSastLinkService.Builder()
-                .setRedirectUri("redirectUri")
-                .setClientId("clientId")
-                .setClientSecret("clientSecret")
-                .setCodeVerifier("codeVerifier")
-                .setHostName("linkhostName")
-                .setRestTemplate(restTemplate)//若项目无restTemplate,可省略直接使用默认配置
-                .build();
-    }
+class Example {
     
-}
-~~~
-
-2. 注入service直接使用，API使用示例及情景如下
-
-~~~java
-package fun.sast.example;
-
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Component;
-import sast.sastlink.sdk.model.UserInfo;
-import sast.sastlink.sdk.model.response.AccessTokenResponse;
-import sast.sastlink.sdk.model.response.RefreshResponse;
-import sast.sastlink.sdk.service.impl.RestTemplateSastLinkService;
-
-@Component
-public class Example {
-    @Resource
-    private RestTemplateSastLinkService sastLinkService;
-
-    public void USER() {
-        //注册sast-link账号
-        //获取邮箱发送验证码,验证邮箱有效性,返回registerTicket,由前端获取
-        String registerTicket = sastLinkService.sendCaptcha("email@example.com");
-        //获取验证码和用户设置好的密码,配合registerTicket注册,成功则返回true
-        sastLinkService.checkCaptchaAndRegister("captcha_from_email", registerTicket, "password");
-        //登录sast-link账号
-        //用户使用邮箱密码登录,返回token
-        String token = sastLinkService.login("email@example.com", "password");
-        //用户使用token登出,登出后token失效,成功返回ture
-        sastLinkService.logout(token);
-    }
-
-    public void OAUTH() {
-        //使用code获取accessToken和refreshToken
-        AccessTokenResponse accessTokenResponse = sastLinkService.accessToken("code");
-        String accessToken = accessTokenResponse.getAccess_token();
-        String refreshToken = accessTokenResponse.getRefresh_token();
-        //accessToken过期后若refreshToken未过期,可使用refreshToken获取新的accessToken和refreshToken
-        RefreshResponse refreshResponse = sastLinkService.refresh(refreshToken);
-        accessToken = refreshResponse.getAccessToken();
-        refreshToken = refreshResponse.getRefreshToken();
-        //使用accessToken获取userInfo
-        UserInfo userInfo = sastLinkService.userInfo(accessToken);
-    }
-
-    public void OAUTH_BY_OTHER() {
-        //由于部分业务(小程序)需要,需要模仿sastLink网页端承担部分验证工作,否则只使用accessToken和refreshToken
-        //首先用户需要使用邮箱密码登录sast-link账号,返回token
-        String token = sastLinkService.login("email@example.com", "password");
-        //由前端返回三个参数,获取code,code只可以使用一次
-        String code = sastLinkService.authorize(token, "code_challenge", "code_challenge_method");
-        //使用code获取accessToken和refreshToken
-        AccessTokenResponse accessTokenResponse = sastLinkService.accessToken(code);
-        String accessToken = accessTokenResponse.getAccess_token();
-        String refreshToken = accessTokenResponse.getRefresh_token();
-        //accessToken过期后若refreshToken未过期,可使用refreshToken获取新的accessToken和refreshToken
-        RefreshResponse refreshResponse = sastLinkService.refresh(refreshToken);
-        accessToken = refreshResponse.getAccessToken();
-        refreshToken = refreshResponse.getRefreshToken();
-        //使用accessToken获取userInfo
-        UserInfo userInfo = sastLinkService.userInfo(accessToken);
-        //使用token登出,登出后token失效,成功返回ture
-        sastLinkService.logout(token);
-    }
-    
-}
-~~~
-
-#### 二，其他环境
-
-- API使用方式相同
-
-~~~java
-package sast.evento.service;
-
-import sast.sastlink.sdk.model.UserInfo;
-import sast.sastlink.sdk.model.response.AccessTokenResponse;
-import sast.sastlink.sdk.model.response.RefreshResponse;
-import sast.sastlink.sdk.service.SastLinkService;
-import sast.sastlink.sdk.service.impl.RestTemplateSastLinkService;
-
-public class Example {
-    private static final SastLinkService sastLinkService = RestTemplateSastLinkService.Builder()
-            .setRedirectUri("redirectUri")
-            .setClientId("clientId")
-            .setClientSecret("clientSecret")
-            .setCodeVerifier("codeVerifier")
-            .setHostName("linkhostName")
+    static private SastLinkService service = HttpClientSastLinkService.Builder()
+            .setRedirectUri("uri")
+            .setClientId("id")
+            .setClientSecret("secret")
+            .setCodeVerifier("verifier")
+            .setHostName("path")
             .build();
     
-    public void USER() {
-        //注册sast-link账号
-        //获取邮箱发送验证码,验证邮箱有效性,返回registerTicket,由前端获取
-        String registerTicket = sastLinkService.sendCaptcha("email@example.com");
-        //获取验证码和用户设置好的密码,配合registerTicket注册,成功则返回true
-        sastLinkService.checkCaptchaAndRegister("captcha_from_email", registerTicket, "password");
-        //登录sast-link账号
-        //用户使用邮箱密码登录,返回token
-        String token = sastLinkService.login("email@example.com", "password");
-        //用户使用token登出,登出后token失效,成功返回ture
-        sastLinkService.logout(token);
+    public static void main(String[] args) {
+        AccessToken accessToken = service.accessToken("code");
+        User user = service.user(accessToken.getAccessToken());
+        RefreshToken refreshToken = service.refreshToken(accessToken.getRefreshToken());
     }
 
-    public void OAUTH() {
-        //使用code获取accessToken和refreshToken
-        AccessTokenResponse accessTokenResponse = sastLinkService.accessToken("code");
-        String accessToken = accessTokenResponse.getAccess_token();
-        String refreshToken = accessTokenResponse.getRefresh_token();
-        //accessToken过期后若refreshToken未过期,可使用refreshToken获取新的accessToken和refreshToken
-        RefreshResponse refreshResponse = sastLinkService.refresh(refreshToken);
-        accessToken = refreshResponse.getAccessToken();
-        refreshToken = refreshResponse.getRefreshToken();
-        //使用accessToken获取userInfo
-        UserInfo userInfo = sastLinkService.userInfo(accessToken);
-    }
-
-    public void OAUTH_BY_OTHER() {
-        //由于部分业务(小程序)需要,需要模仿sastLink网页端承担部分验证工作,否则只使用accessToken和refreshToken
-        //首先用户需要使用邮箱密码登录,返回token
-        String token = sastLinkService.login("email@example.com", "password");
-        //由前端返回三个参数,获取code,code只可以使用一次
-        String code = sastLinkService.authorize(token, "code_challenge", "code_challenge_method");
-        //使用code获取accessToken和refreshToken
-        AccessTokenResponse accessTokenResponse = sastLinkService.accessToken(code);
-        String accessToken = accessTokenResponse.getAccess_token();
-        String refreshToken = accessTokenResponse.getRefresh_token();
-        //accessToken过期后若refreshToken未过期,可使用refreshToken获取新的accessToken和refreshToken
-        RefreshResponse refreshResponse = sastLinkService.refresh(refreshToken);
-        accessToken = refreshResponse.getAccessToken();
-        refreshToken = refreshResponse.getRefreshToken();
-        //使用accessToken获取userInfo
-        UserInfo userInfo = sastLinkService.userInfo(accessToken);
-        //使用token登出,登出后token失效,成功返回ture
-        sastLinkService.logout(token);
-    }
 }
-
 ~~~
 
 #### 常见问题
