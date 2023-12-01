@@ -41,7 +41,7 @@
 ~~~java
 class Example {
     
-    static private SastLinkService service = HttpClientSastLinkService.builder()
+    static private SastLinkService service = new HttpClientSastLinkService.Builder()
             .setRedirectUri("uri")
             .setClientId("id")
             .setClientSecret("secret")

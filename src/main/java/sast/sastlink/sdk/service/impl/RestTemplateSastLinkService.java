@@ -14,15 +14,12 @@ import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
+import sast.sastlink.sdk.service.SastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 
-public final class RestTemplateSastLinkService extends AbstractSastLinkService<RestTemplateSastLinkService> {
+public final class RestTemplateSastLinkService extends AbstractSastLinkService {
     private final RestTemplate restTemplate;
-
-    public static RestTemplateSastLinkService.Builder builder() {
-        return new RestTemplateSastLinkService.Builder();
-    }
 
     private RestTemplateSastLinkService(Builder builder) {
         super(builder);
@@ -92,7 +89,7 @@ public final class RestTemplateSastLinkService extends AbstractSastLinkService<R
     }
 
 
-    public static class Builder extends AbstractSastLinkService.Builder<RestTemplateSastLinkService,Builder> {
+    public static class Builder extends AbstractSastLinkService.Builder<Builder> {
         private RestTemplate restTemplate;
 
         public Builder setRestTemplate(RestTemplate restTemplate) {
@@ -106,7 +103,7 @@ public final class RestTemplateSastLinkService extends AbstractSastLinkService<R
         }
 
         @Override
-        public RestTemplateSastLinkService build() {
+        public SastLinkService build() {
             super.build();
             if (this.restTemplate == null) {
                 this.restTemplate = new RestTemplate();
