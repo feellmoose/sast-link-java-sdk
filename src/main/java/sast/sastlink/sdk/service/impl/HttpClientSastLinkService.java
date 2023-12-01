@@ -28,11 +28,6 @@ import java.util.Random;
 public final class HttpClientSastLinkService extends AbstractSastLinkService {
     private final HttpClient httpClient;
     private static final String boundary = new BigInteger(256, new Random()).toString();
-
-    public static HttpClientSastLinkService.Builder builder() {
-        return new HttpClientSastLinkService.Builder();
-    }
-
     private HttpClientSastLinkService(Builder builder) {
         super(builder);
         this.httpClient = builder.httpClient;

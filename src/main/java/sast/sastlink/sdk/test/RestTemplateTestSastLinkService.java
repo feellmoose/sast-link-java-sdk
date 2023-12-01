@@ -51,10 +51,6 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
         this.hostName = builder.hostName;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     @Setter
     @Accessors(chain = true)
     public static class Builder {
@@ -70,7 +66,7 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
                 this.restTemplate = new RestTemplate();
             }
             RestTemplateTestSastLinkService testSastLinkService = new RestTemplateTestSastLinkService(this);
-            SastLinkService linkService = RestTemplateSastLinkService.builder()
+            SastLinkService linkService = new RestTemplateSastLinkService.Builder()
                     .setRestTemplate(this.restTemplate)
                     .setClientId(this.clientId)
                     .setClientSecret(this.clientSecret)

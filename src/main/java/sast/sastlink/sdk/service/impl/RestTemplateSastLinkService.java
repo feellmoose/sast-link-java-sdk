@@ -21,10 +21,6 @@ import sast.sastlink.sdk.util.JsonUtil;
 public final class RestTemplateSastLinkService extends AbstractSastLinkService {
     private final RestTemplate restTemplate;
 
-    public static RestTemplateSastLinkService.Builder builder() {
-        return new RestTemplateSastLinkService.Builder();
-    }
-
     private RestTemplateSastLinkService(Builder builder) {
         super(builder);
         this.restTemplate = builder.restTemplate;
