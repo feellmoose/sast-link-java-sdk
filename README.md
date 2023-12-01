@@ -19,7 +19,7 @@
 
 #### 通过jar包及Maven进行安装
 
-1. 前往[地址]()下载jar包
+1. 前往[地址](https://github.com/feellmoose/sast-link-java-sdk/releases/download/v0.1.0/SastLink-Java-SDK-0.1.1.jar)下载jar包
 2. 项目根目录下新建lib目录，在lib目录下导入jar包
 3. 使用Maven配合进行依赖管理，为pom文件添加依赖
 
