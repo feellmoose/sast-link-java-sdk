@@ -70,7 +70,7 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
                 this.restTemplate = new RestTemplate();
             }
             RestTemplateTestSastLinkService testSastLinkService = new RestTemplateTestSastLinkService(this);
-            RestTemplateSastLinkService linkService = RestTemplateSastLinkService.builder()
+            SastLinkService linkService = RestTemplateSastLinkService.builder()
                     .setRestTemplate(this.restTemplate)
                     .setClientId(this.clientId)
                     .setClientSecret(this.clientSecret)
@@ -79,7 +79,7 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
                     .setHostName(this.hostName)
                     .build();
             testSastLinkService.restTemplate = this.restTemplate;
-            testSastLinkService.sastLinkService = linkService;
+            testSastLinkService.sastLinkService = (RestTemplateSastLinkService) linkService;
             return testSastLinkService;
         }
     }

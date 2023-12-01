@@ -10,17 +10,13 @@ import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
+import sast.sastlink.sdk.service.SastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 import java.io.IOException;
 
-public final class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpSastLinkService> {
+public final class OkHttpSastLinkService extends AbstractSastLinkService {
     private final OkHttpClient okHttpClient;
-
-    public static OkHttpSastLinkService.Builder builder() {
-        return new OkHttpSastLinkService.Builder();
-    }
-
     private OkHttpSastLinkService(Builder builder) {
         super(builder);
         this.okHttpClient = builder.okHttpClient;
@@ -100,7 +96,7 @@ public final class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpS
         return body;
     }
 
-    public static class Builder extends AbstractSastLinkService.Builder<OkHttpSastLinkService,Builder> {
+    public static class Builder extends AbstractSastLinkService.Builder<Builder> {
         private OkHttpClient okHttpClient;
 
         public Builder setOkHttpClient(OkHttpClient okHttpClient) {
@@ -114,7 +110,7 @@ public final class OkHttpSastLinkService extends AbstractSastLinkService<OkHttpS
         }
 
         @Override
-        public OkHttpSastLinkService build() {
+        public SastLinkService build() {
             super.build();
             if (okHttpClient == null) {
                 okHttpClient = new OkHttpClient();
