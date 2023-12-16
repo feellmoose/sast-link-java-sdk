@@ -3,8 +3,8 @@ package sast.sastlink.sdk.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import sast.sastlink.sdk.enums.GrantType;
 import sast.sastlink.sdk.enums.SastLinkApi;
-import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.enums.SastLinkErrorEnum;
+import sast.sastlink.sdk.exception.SastLinkException;
 import sast.sastlink.sdk.model.response.SastLinkResponse;
 import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
@@ -13,7 +13,6 @@ import sast.sastlink.sdk.service.SastLinkService;
 import sast.sastlink.sdk.util.JsonUtil;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -23,11 +22,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public final class HttpClientSastLinkService extends AbstractSastLinkService {
     private final HttpClient httpClient;
-    private static final String boundary = new BigInteger(256, new Random()).toString();
+
     private HttpClientSastLinkService(Builder builder) {
         super(builder);
         this.httpClient = builder.httpClient;
@@ -136,7 +134,7 @@ public final class HttpClientSastLinkService extends AbstractSastLinkService {
     }
 
 
-    private static HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data) {
+    public static HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data) {
         // Result request body
         List<byte[]> byteArrays = new ArrayList<>();
         // Separator with boundary

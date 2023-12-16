@@ -3,13 +3,6 @@ package sast.sastlink.sdk.test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import sast.sastlink.sdk.enums.SastLinkApi;
 import sast.sastlink.sdk.enums.SastLinkErrorEnum;
 import sast.sastlink.sdk.enums.Scope;
@@ -20,7 +13,7 @@ import sast.sastlink.sdk.model.response.data.AccessToken;
 import sast.sastlink.sdk.model.response.data.RefreshToken;
 import sast.sastlink.sdk.model.response.data.User;
 import sast.sastlink.sdk.service.SastLinkService;
-import sast.sastlink.sdk.service.impl.RestTemplateSastLinkService;
+import sast.sastlink.sdk.service.impl.HttpClientSastLinkService;
 import sast.sastlink.sdk.test.data.Token;
 import sast.sastlink.sdk.test.data.Verify;
 import sast.sastlink.sdk.util.JsonUtil;
@@ -29,21 +22,25 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
 import java.util.Map;
 
+import static sast.sastlink.sdk.constants.LinkParamConstants.CONTENT_TYPE;
+import static sast.sastlink.sdk.service.impl.HttpClientSastLinkService.boundary;
+import static sast.sastlink.sdk.service.impl.HttpClientSastLinkService.ofMimeMultipartData;
 
-public class RestTemplateTestSastLinkService implements SastLinkService {
-    private RestTemplateSastLinkService sastLinkService;
-    private RestTemplate restTemplate;
+
+public class TestSastLinkServiceAdapter implements SastLinkService {
+    private HttpClientSastLinkService sastLinkService;
+    private HttpClient httpClient;
     private final String clientId;
     private final String clientSecret;
     private final String codeVerifier;
     private final String redirectUri;
     private final String hostName;
 
-    public RestTemplateTestSastLinkService(Builder builder) {
+    public TestSastLinkServiceAdapter(Builder builder) {
         this.clientId = builder.clientId;
         this.clientSecret = builder.clientSecret;
         this.codeVerifier = builder.codeVerifier;
@@ -54,32 +51,31 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
     @Setter
     @Accessors(chain = true)
     public static class Builder {
-        private RestTemplate restTemplate;
+        private HttpClient httpClient;
         private String clientId;
         private String clientSecret;
         private String codeVerifier;
         private String redirectUri;
         private String hostName;
 
-        public RestTemplateTestSastLinkService build() {
-            if (this.restTemplate == null) {
-                this.restTemplate = new RestTemplate();
+        public TestSastLinkServiceAdapter build() {
+            if (this.httpClient == null) {
+                this.httpClient = HttpClient.newHttpClient();
             }
-            RestTemplateTestSastLinkService testSastLinkService = new RestTemplateTestSastLinkService(this);
-            SastLinkService linkService = new RestTemplateSastLinkService.Builder()
-                    .setRestTemplate(this.restTemplate)
+            TestSastLinkServiceAdapter testSastLinkService = new TestSastLinkServiceAdapter(this);
+            SastLinkService linkService = new HttpClientSastLinkService.Builder()
+                    .setHttpClient(this.httpClient)
                     .setClientId(this.clientId)
                     .setClientSecret(this.clientSecret)
                     .setCodeVerifier(this.codeVerifier)
                     .setRedirectUri(this.redirectUri)
                     .setHostName(this.hostName)
                     .build();
-            testSastLinkService.restTemplate = this.restTemplate;
-            testSastLinkService.sastLinkService = (RestTemplateSastLinkService) linkService;
+            testSastLinkService.httpClient = this.httpClient;
+            testSastLinkService.sastLinkService = (HttpClientSastLinkService) linkService;
             return testSastLinkService;
         }
     }
-
 
     public String authorize(String token, String code_challenge, String code_challenge_method) throws SastLinkException {
         URI uri;
@@ -95,8 +91,7 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
         } catch (URISyntaxException e) {
             throw new SastLinkException(e);
         }
-        HttpClient httpClient = HttpClient.newHttpClient();
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder(uri)
+        HttpRequest request = HttpRequest.newBuilder(uri)
                 .GET().build();
         String location;
         try {
@@ -108,53 +103,62 @@ public class RestTemplateTestSastLinkService implements SastLinkService {
         return location.substring(location.indexOf("code=") + 5, location.indexOf("&state="));
     }
 
-
     public Token login(String email, String password) throws SastLinkException {
         String loginTicket = verifyAccount(email).getLoginTicket();
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("LOGIN-TICKET", loginTicket);
-        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-        multiValueMap.add("password", password);
-        RequestEntity<MultiValueMap<String, String>> request = new RequestEntity<>(
-                multiValueMap,
-                httpHeaders,
-                HttpMethod.POST,
-                SastLinkApi.LOGIN.getHttpURI(hostName));
-        String body;
+        Map<Object, Object> data = Map.of("password", password);
+        HttpRequest request = HttpRequest.newBuilder(SastLinkApi.LOGIN.getHttpURI(hostName))
+                .header(CONTENT_TYPE, "multipart/form-data;boundary=" + boundary)
+                .header("LOGIN-TICKET", loginTicket)
+                .POST(ofMimeMultipartData(data))
+                .build();
+        Token token;
         try {
-            body = restTemplate.exchange(request, String.class).getBody();
-        } catch (RestClientException e) {
-            throw new SastLinkException(e.getMessage());
+            token = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    .body()
+                    .transform(body -> {
+                        if (body.isEmpty()) throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
+                        SastLinkResponse<Token> response = JsonUtil.fromJson(body, new TypeReference<>() {
+                        });
+                        if (!response.isSuccess()) throw new SastLinkException(response);
+                        return response.getData();
+                    });
+        } catch (IOException e) {
+            throw new SastLinkException(SastLinkErrorEnum.IO_ERROR, e);
+        } catch (InterruptedException e) {
+            throw new SastLinkException(e);
         }
-        if (body == null) throw new SastLinkException(SastLinkErrorEnum.NULL_RESPONSE_BODY);
-        if (body.isEmpty()) throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
-        SastLinkResponse<Token> response = JsonUtil.fromJson(body, new TypeReference<>() {
-        });
-        if (!response.isSuccess()) {
-            throw new SastLinkException(response);
-        }
-        return response.getData();
+        return token;
     }
 
     private Verify verifyAccount(String username) throws SastLinkException {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("username", username);
-        uriVariables.put("flag", "1");
-        String body;
+        URI uri;
         try {
-            body = restTemplate.getForObject(SastLinkApi.VERIFY_ACCOUNT.getHttp(hostName), String.class, uriVariables);
-        } catch (RestClientException e) {
-            throw new SastLinkException(e.getMessage());
+            uri = new URI(SastLinkApi.VERIFY_ACCOUNT.getHttp(hostName) +
+                    "?username=" + username +
+                    "&flag=1");
+        } catch (URISyntaxException e) {
+            throw new SastLinkException(e);
         }
-        if (body == null) throw new SastLinkException(SastLinkErrorEnum.NULL_RESPONSE_BODY);
-        if (body.isEmpty()) throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
-        SastLinkResponse<Verify> response = JsonUtil.fromJson(body, new TypeReference<>() {
-        });
-        if (!response.isSuccess()) {
-            throw new SastLinkException(response);
+        HttpRequest request = HttpRequest.newBuilder(uri)
+                .GET()
+                .build();
+        Verify verify;
+        try {
+            verify = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                    .body()
+                    .transform(body -> {
+                        if (body.isEmpty()) throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
+                        SastLinkResponse<Verify> response = JsonUtil.fromJson(body, new TypeReference<>() {
+                        });
+                        if (!response.isSuccess()) throw new SastLinkException(response);
+                        return response.getData();
+                    });
+        } catch (IOException e) {
+            throw new SastLinkException(SastLinkErrorEnum.IO_ERROR, e);
+        } catch (InterruptedException e) {
+            throw new SastLinkException(e);
         }
-        return response.getData();
-
+        return verify;
     }
 
     @Override

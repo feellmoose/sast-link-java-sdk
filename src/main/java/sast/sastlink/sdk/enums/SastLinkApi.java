@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 @Getter
 public enum SastLinkApi {
     AUTHORIZE("OAUTH认证", "/oauth2/authorize"),
-    VERIFY_ACCOUNT("验证账号", "/verify/account?username={username}&flag={flag}"),
+    VERIFY_ACCOUNT("验证账号", "/verify/account"),
     LOGIN("登录", "/user/login"),
 
     ACCESS_TOKEN("获取ACCESS_TOKEN", "/oauth2/token"),
