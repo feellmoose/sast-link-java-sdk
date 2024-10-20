@@ -10,6 +10,7 @@ public enum GrantType {
     PASSWORD("password"),
     CLIENT_CREDENTIALS("client_credentials"),
     IMPLICIT("implicit"),
+    TOKEN("token"),
     REFRESH_TOKEN("refresh_token");
 
     GrantType(String name) {

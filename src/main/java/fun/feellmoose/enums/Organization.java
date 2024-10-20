@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
 @Getter
+@Deprecated
 public enum Organization {
     C_SHARP(1, Department.Software_R_D, "C#组"),
     CPP(2, Department.Software_R_D, "C++组"),

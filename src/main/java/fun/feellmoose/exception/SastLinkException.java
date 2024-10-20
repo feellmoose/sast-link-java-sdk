@@ -53,6 +53,7 @@ public class SastLinkException extends RuntimeException {
                 .append(errorEnum.getMessage());
         if (throwable != null) {
             String msg = throwable.getMessage();
+            if (msg == null) msg = "";
             //append if msg is from sast-link
             if (msg.contains("Bad Request:")) {
                 SastLinkResponse<?> sastLinkResponse = JsonUtil.fromJson(msg.substring(msg.indexOf("Bad Request:") + 14, msg.length() - 1), SastLinkResponse.class);

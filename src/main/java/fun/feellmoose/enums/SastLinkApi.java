@@ -10,7 +10,6 @@ public enum SastLinkApi {
     AUTHORIZE("OAUTH认证", "/oauth2/authorize"),
     VERIFY_ACCOUNT("验证账号", "/verify/account"),
     LOGIN("登录", "/user/login"),
-
     ACCESS_TOKEN("获取ACCESS_TOKEN", "/oauth2/token"),
     REFRESH("刷新ACCESS_TOKEN", "/oauth2/refresh"),
     USER_INFO("获取用户信息", "/oauth2/userinfo");
@@ -21,7 +20,7 @@ public enum SastLinkApi {
     private final String description;
     private final String url;
     public String getHttp(String hostName) {
-        return "http://" + hostName + this.url;
+        return "https://" + hostName + this.url;
     }
 
     public URI getHttpURI(String hostName) {

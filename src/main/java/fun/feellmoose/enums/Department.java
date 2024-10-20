@@ -1,5 +1,6 @@
 package fun.feellmoose.enums;
 
+@Deprecated
 public enum Department {
     Software_R_D(1, "软件研发部"),
     ELECTRONIC(2, "电子部"),

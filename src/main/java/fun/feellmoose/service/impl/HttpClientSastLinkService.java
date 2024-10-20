@@ -1,16 +1,18 @@
 package fun.feellmoose.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import fun.feellmoose.model.response.data.AccessToken;
 import fun.feellmoose.enums.GrantType;
 import fun.feellmoose.enums.SastLinkApi;
 import fun.feellmoose.enums.SastLinkErrorEnum;
 import fun.feellmoose.exception.SastLinkException;
 import fun.feellmoose.model.response.SastLinkResponse;
+import fun.feellmoose.model.response.data.AccessToken;
 import fun.feellmoose.model.response.data.RefreshToken;
 import fun.feellmoose.model.response.data.User;
 import fun.feellmoose.service.SastLinkService;
 import fun.feellmoose.util.JsonUtil;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -20,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +36,8 @@ public final class HttpClientSastLinkService extends AbstractSastLinkService {
 
     @Override
     public AccessToken accessToken(String code) throws SastLinkException {
+        if (code_verifier == null) throw new SastLinkException("Get AccessToken by params(code) with no default verifier is not allowed");
+        if (redirect_uri == null) throw new SastLinkException("Get AccessToken by params(code) with no default verifier is not allowed");
         Map<Object, Object> data = Map.of(
                 CODE, code,
                 CODE_VERIFIER, code_verifier,
@@ -40,6 +45,39 @@ public final class HttpClientSastLinkService extends AbstractSastLinkService {
                 REDIRECT_URI, this.redirect_uri,
                 CLIENT_ID, this.client_id,
                 CLIENT_SECRET, this.client_secret);
+        HttpRequest request = HttpRequest.newBuilder(SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name))
+                .header(CONTENT_TYPE, "multipart/form-data;boundary=" + boundary)
+                .POST(ofMimeMultipartData(data))
+                .build();
+        AccessToken accessToken;
+        try {
+            accessToken = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body().transform(body -> {
+                if (body.isEmpty()) throw new SastLinkException(SastLinkErrorEnum.EMPTY_RESPONSE_BODY);
+                SastLinkResponse<AccessToken> response = JsonUtil.fromJson(body, new TypeReference<>() {
+                });
+                if (!response.isSuccess()) throw new SastLinkException(response);
+                return response.getData();
+            });
+        } catch (IOException e) {
+            throw new SastLinkException(SastLinkErrorEnum.IO_ERROR, e);
+        } catch (InterruptedException e) {
+            throw new SastLinkException(e);
+        }
+        return accessToken;
+    }
+
+    @Override
+    public AccessToken accessToken(String code, String redirectURI, String codeVerifier) throws SastLinkException {
+        Map<Object, Object> data = new HashMap<>();
+        if (codeVerifier != null) data.put(CODE_VERIFIER, codeVerifier);
+        if (redirectURI != null) data.put(REDIRECT_URI, redirectURI);
+        else if (redirect_uri != null) data.put(REDIRECT_URI, redirect_uri);
+        else throw new SastLinkException("Get AccessToken by params(code) with no default verifier is not allowed");
+        data.put(CODE, code);
+        data.put(GRANT_TYPE, GrantType.AUTHORIZATION_CODE.name);
+        data.put(CLIENT_ID, client_id);
+        data.put(CLIENT_SECRET, client_secret);
+
         HttpRequest request = HttpRequest.newBuilder(SastLinkApi.ACCESS_TOKEN.getHttpURI(host_name))
                 .header(CONTENT_TYPE, "multipart/form-data;boundary=" + boundary)
                 .POST(ofMimeMultipartData(data))

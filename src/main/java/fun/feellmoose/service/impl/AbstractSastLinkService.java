@@ -40,11 +40,13 @@ public sealed abstract class AbstractSastLinkService implements SastLinkService,
             return self();
         }
 
+        @Deprecated
         public B setCodeVerifier(String code_verifier) {
             self().code_verifier = code_verifier;
             return self();
         }
 
+        @Deprecated
         public B setRedirectUri(String redirect_uri) {
             self().redirect_uri = redirect_uri;
             return self();
@@ -59,15 +61,11 @@ public sealed abstract class AbstractSastLinkService implements SastLinkService,
 
         @Override
         public SastLinkService build() {
-            //检查参数
-            if (this.redirect_uri.isEmpty() || this.client_id.isEmpty() || this.client_secret.isEmpty()) {
+            if (this.client_id.isEmpty() || this.client_secret.isEmpty()) {
                 throw new SastLinkException("redirect_uri, client_id or client_secret not exist");
             }
             if (this.host_name.isEmpty()) {
                 throw new SastLinkException("sast-link server host_name is needed in building a sastLinkService");
-            }
-            if (this.code_verifier.isEmpty()) {
-                throw new SastLinkException("code_verifier is needed in building a sastLinkService");
             }
             return (SastLinkService) null;
         }
