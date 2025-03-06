@@ -1,5 +1,7 @@
 # SAST-Link-SDK
 
+English/[中文](https://github.com/feellmoose/sast-link-java-sdk/blob/main/README_CN.md)
+
 ## Java-SDK
 
 ### Introduction
