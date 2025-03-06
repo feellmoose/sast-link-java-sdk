@@ -1,10 +1,10 @@
 # SAST-Link-SDK
 
-## Java-SDK
-
 [![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](https://choosealicense.com/licenses/agpl-3.0/)
 
 中文/[English](https://github.com/feellmoose/sast-link-java-sdk/blob/main/README.md)
+
+## Java-SDK
 
 ### 简介
 
